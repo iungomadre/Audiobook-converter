@@ -13,7 +13,14 @@ const FIELDS: TextField[] = [
   { key: 'description', label: 'Description', multiline: true },
 ];
 
-export const createMetadataForm = (store: BookStore): HTMLElement => {
+type MetadataFormOptions = {
+  /** Extra controls shown under the cover, e.g. an online cover search button. */
+  coverActions?: HTMLElement[];
+  /** Optional help text shown under the cover controls. */
+  coverHint?: HTMLElement;
+};
+
+export const createMetadataForm = (store: BookStore, { coverActions = [], coverHint }: MetadataFormOptions = {}): HTMLElement => {
   const inputs = new Map<keyof BookMetadata, HTMLInputElement | HTMLTextAreaElement>();
 
   const fields = FIELDS.map((field) => {
@@ -36,24 +43,73 @@ export const createMetadataForm = (store: BookStore): HTMLElement => {
   const coverError = h('p', { class: 'error', attrs: { role: 'alert' } });
   const removeCover = h('button', { type: 'button', class: 'btn small', onclick: () => store.setCover(null) }, 'Remove cover');
 
-  coverInput.addEventListener('change', async () => {
-    const file = coverInput.files?.[0];
-    coverInput.value = '';
-    if (!file) return;
+  const useImage = async (blob: Blob) => {
     coverError.textContent = '';
     try {
-      const image = await normalizeCover(file);
+      const image = await normalizeCover(blob);
       const previewUrl = URL.createObjectURL(new Blob([image.data as BlobPart], { type: image.mimeType }));
       store.setCover({ ...image, previewUrl });
     } catch {
       coverError.textContent = 'This image could not be read. Try a JPEG or PNG file.';
     }
+  };
+
+  coverInput.addEventListener('change', () => {
+    const file = coverInput.files?.[0];
+    coverInput.value = '';
+    if (file) void useImage(file);
+  });
+
+  // Paste button: reads an image copied anywhere (store page, Files, mail) via the async clipboard API.
+  const clipboard = navigator.clipboard as Clipboard | undefined;
+  const pasteButton = typeof clipboard?.read === 'function'
+    ? h('button', { type: 'button', class: 'btn small', title: 'Paste an image you copied' }, 'Paste')
+    : null;
+  pasteButton?.addEventListener('click', async () => {
+    try {
+      for (const item of await clipboard!.read()) {
+        const type = item.types.find((candidate) => candidate.startsWith('image/'));
+        if (type) return void (await useImage(await item.getType(type)));
+      }
+      coverError.textContent = 'The clipboard has no image. Copy a cover image first.';
+    } catch {
+      coverError.textContent = 'Could not read the clipboard. Allow pasting when the browser asks.';
+    }
+  });
+
+  // Ctrl/⌘+V anywhere on the page, unless the user is pasting into a text field.
+  document.addEventListener('paste', (event) => {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('input, textarea, [contenteditable]')) return;
+    const file = Array.from(event.clipboardData?.files ?? []).find((candidate) => candidate.type.startsWith('image/'));
+    if (file) {
+      event.preventDefault();
+      void useImage(file);
+    }
+  });
+
+  const coverButton = h('button', { type: 'button', class: 'cover-button', title: 'Choose, paste or drop a cover image', onclick: () => coverInput.click() },
+    coverPreview, coverPlaceholder);
+  coverButton.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    coverButton.classList.add('is-over');
+  });
+  coverButton.addEventListener('dragleave', () => coverButton.classList.remove('is-over'));
+  coverButton.addEventListener('drop', (event) => {
+    event.preventDefault();
+    coverButton.classList.remove('is-over');
+    const file = Array.from(event.dataTransfer?.files ?? []).find((candidate) => candidate.type.startsWith('image/'));
+    if (file) void useImage(file);
   });
 
   const cover = h('div', { class: 'cover' },
-    h('button', { type: 'button', class: 'cover-button', title: 'Choose cover image', onclick: () => coverInput.click() },
-      coverPreview, coverPlaceholder),
-    removeCover,
+    coverButton,
+    h('div', { class: 'row' },
+      h('button', { type: 'button', class: 'btn small', onclick: () => coverInput.click() }, 'Upload'),
+      pasteButton,
+      ...coverActions,
+      removeCover),
+    coverHint,
     coverError,
     coverInput,
   );

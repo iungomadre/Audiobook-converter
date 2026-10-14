@@ -11,6 +11,10 @@ server: decoding, AAC encoding and MP4 writing all run on your device.
 - Chapter titles default to "Chapter N"; rename, reorder or remove them.
 - Title, author, narrator, year, genre, description and cover image.
   Fields and cover are pre-filled from the first file's ID3 tags when present.
+- Covers: upload, drop, paste (copy an image anywhere, then tap Paste or press
+  Ctrl/⌘+V), or "Search Google Images", which opens Google in a new tab so you
+  can copy a cover and paste it back. Every cover is made square for audiobook
+  players (non-square images are centered on a blurred fill, never cropped).
 - Output plays in Apple Books: AAC audio, QuickTime chapter track, Nero `chpl`
   chapters (other players), iTunes metadata and `stik = Audiobook`.
 - Long books (40 h+) are fine: audio is streamed through a Web Worker and the
@@ -64,11 +68,12 @@ The code follows [Feature-Sliced Design](https://feature-sliced.design):
 src/
   app/        entry point and global styles
   pages/      converter page (composes widgets and features)
-  widgets/    app-header, book-setup (file picker + chapter list)
+  widgets/    app-header, book-setup (files + chapters), book-details (metadata + cover)
   features/
     select-audio-files/   folder/file picking, drag & drop, tag pre-fill
     edit-chapters/        chapter titles, order, removal
-    edit-book-metadata/   metadata form, cover, audio quality
+    edit-book-metadata/   metadata form, cover (upload/paste/drop), audio quality
+    find-cover-online/    opens Google Images for the book in a new tab
     convert-book/         worker, conversion pipeline, progress, saving
   entities/
     book/                 book model, store, audio presets

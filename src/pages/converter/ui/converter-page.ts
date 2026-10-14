@@ -1,8 +1,8 @@
 import type { BookStore } from '@/entities/book';
 import { createConvertPanel } from '@/features/convert-book';
-import { createMetadataForm } from '@/features/edit-book-metadata';
 import { h } from '@/shared/ui';
 import { createAppHeader } from '@/widgets/app-header';
+import { createBookDetails } from '@/widgets/book-details';
 import { createBookSetup } from '@/widgets/book-setup';
 
 const section = (step: number, title: string, content: HTMLElement) =>
@@ -13,7 +13,7 @@ const section = (step: number, title: string, content: HTMLElement) =>
 export const createConverterPage = (store: BookStore): HTMLElement => {
   const editableSections = [
     section(1, 'Audio files', createBookSetup(store)),
-    section(2, 'Book details', createMetadataForm(store)),
+    section(2, 'Book details', createBookDetails(store)),
   ];
 
   // While converting, the book can be reviewed but not changed: `inert` blocks
