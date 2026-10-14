@@ -106,15 +106,13 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
     else message.textContent = '';
 
     if (state.status === 'running' && state.progress) {
-      const { processedSeconds, totalSeconds, chapterIndex } = state.progress;
+      const { processedSeconds, totalSeconds, chapterIndex, remainingSeconds } = state.progress;
       const fraction = totalSeconds ? Math.min(1, processedSeconds / totalSeconds) : 0;
       progressBar.value = fraction;
-      const elapsed = (Date.now() - state.startedAt) / 1000;
-      const remaining = fraction > 0.01 ? elapsed / fraction - elapsed : null;
       progressText.textContent = [
         t('convert.progressChapter', { n: chapterIndex + 1, total: chapters.length }),
         totalSeconds ? `${Math.floor(fraction * 100)}%` : formatDuration(processedSeconds),
-        remaining !== null ? t('convert.timeLeft', { time: formatDuration(remaining) }) : t('convert.estimating'),
+        remainingSeconds !== null ? t('convert.timeLeft', { time: formatDuration(remainingSeconds) }) : t('convert.estimating'),
       ].join(' · ');
       statusProgress.value = fraction;
       statusText.textContent = progressText.textContent;

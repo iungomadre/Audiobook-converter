@@ -2,6 +2,7 @@ import { getPreset, numberedTitle, totalDuration, type Book } from '@/entities/b
 import { AAC_FRAMES_PER_PACKET, type ChapterMarker } from '@/shared/lib/mp4';
 import { clearOutputs, createScreenWakeLock, interruptedFlag } from '@/shared/lib/storage';
 import { SAMPLE_RATE } from '../lib/convert-to-m4b';
+import { createEtaEstimator } from '../lib/eta';
 import { LocalizedError, toErrorInfo, type ErrorInfo } from './errors';
 import type { ConversionJob, ConversionProgress, WorkerRequest, WorkerResponse } from './protocol';
 
@@ -101,14 +102,17 @@ export const createConversion = () => {
     const startedAt = Date.now();
     const chapterSeconds = job.chapters.map(() => 0);
     let chaptersDone = 0;
+    const eta = totalSeconds === null ? null : createEtaEstimator(totalSeconds, startedAt);
     const report = () => {
       if (id !== runId) return;
+      const processedSeconds = chapterSeconds.reduce((sum, seconds) => sum + seconds, 0);
       set({
         status: 'running',
         progress: {
           chapterIndex: Math.min(chaptersDone, job.chapters.length - 1),
-          processedSeconds: chapterSeconds.reduce((sum, seconds) => sum + seconds, 0),
+          processedSeconds,
           totalSeconds,
+          remainingSeconds: eta?.update(processedSeconds, Date.now()) ?? null,
         },
         startedAt,
       });

@@ -38,6 +38,8 @@ export type ConversionProgress = {
   chapterIndex: number;
   processedSeconds: number;
   totalSeconds: number | null;
+  /** Smoothed estimate of the time left, or null while still estimating. */
+  remainingSeconds: number | null;
 };
 
 export type WorkerResponse =
