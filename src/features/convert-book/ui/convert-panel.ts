@@ -19,7 +19,13 @@ type ConvertPanelOptions = {
   onBusyChange?: (busy: boolean) => void;
 };
 
-export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPanelOptions = {}): HTMLElement => {
+export type ConvertPanel = {
+  panel: HTMLElement;
+  /** Slim progress bar for the top of the screen, shown while converting and the panel is out of view. */
+  statusBar: HTMLElement;
+};
+
+export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPanelOptions = {}): ConvertPanel => {
   const wasInterrupted = interruptedFlag.consume();
   const conversion = createConversion();
   const unsupported = getUnsupportedReason();
@@ -31,6 +37,11 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
   const progressBar = h('progress', { max: 1, value: 0 });
   const progressText = h('p', { class: 'muted' });
   const progress = h('div', { class: 'progress' }, progressBar, progressText);
+
+  const statusProgress = h('progress', { max: 1, value: 0 });
+  const statusText = h('span', { class: 'status-bar-text' });
+  const statusBar = h('button', { type: 'button', class: 'status-bar', hidden: true }, statusText, statusProgress);
+  let panelVisible = true;
 
   const convertButton = h('button', { type: 'button', class: 'btn primary large' }, tr('convert.create'));
   const cancelButton = h('button', { type: 'button', class: 'btn', onclick: () => conversion.cancel() }, tr('convert.cancel'));
@@ -74,6 +85,7 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
     cancelButton.hidden = !running;
     saveButton.hidden = againButton.hidden = state.status !== 'done';
     progress.hidden = !running;
+    statusBar.hidden = !running || panelVisible;
 
     estimate.hidden = running || state.status === 'done' || chapters.length === 0;
     estimate.textContent = total === null
@@ -104,6 +116,8 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
         totalSeconds ? `${Math.floor(fraction * 100)}%` : formatDuration(processedSeconds),
         remaining !== null ? t('convert.timeLeft', { time: formatDuration(remaining) }) : t('convert.estimating'),
       ].join(' · ');
+      statusProgress.value = fraction;
+      statusText.textContent = progressText.textContent;
     }
   };
 
@@ -118,7 +132,7 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
   store.subscribe(() => render(conversion.get()));
   onLanguageChange(() => render(conversion.get()));
 
-  return h('div', { class: 'convert' },
+  const panel = h('div', { class: 'convert' },
     interruptedNotice,
     estimate,
     h('div', { class: 'row' }, convertButton, saveButton, cancelButton, againButton),
@@ -126,4 +140,13 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
     message,
     h('p', { class: 'muted small' }, tr('convert.privacy')),
   );
+
+  // Show the top status bar only while the progress in the panel is scrolled out of view.
+  new IntersectionObserver(([entry]) => {
+    panelVisible = entry.isIntersecting;
+    render(conversion.get());
+  }).observe(progress);
+  statusBar.addEventListener('click', () => panel.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+
+  return { panel, statusBar };
 };

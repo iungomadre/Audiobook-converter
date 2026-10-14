@@ -1,6 +1,6 @@
 import { tr } from '@/shared/i18n';
 import type { BookStore } from '@/entities/book';
-import { h } from '@/shared/ui';
+import { h, isLocked } from '@/shared/ui';
 import { fromDataTransfer, fromFileList, type PickedFile } from '../lib/collect-files';
 import { loadFiles } from '../model/load-files';
 
@@ -38,12 +38,13 @@ export const createFilePicker = (store: BookStore): HTMLElement => {
 
   dropzone.addEventListener('dragover', (event) => {
     event.preventDefault();
-    dropzone.classList.add('is-over');
+    if (!isLocked(dropzone)) dropzone.classList.add('is-over');
   });
   dropzone.addEventListener('dragleave', () => dropzone.classList.remove('is-over'));
   dropzone.addEventListener('drop', (event) => {
     event.preventDefault();
     dropzone.classList.remove('is-over');
+    if (isLocked(dropzone)) return;
     if (event.dataTransfer) void fromDataTransfer(event.dataTransfer).then(handle);
   });
 

@@ -1,1 +1,1 @@
-export { createConvertPanel } from './ui/convert-panel';
+export { createConvertPanel, type ConvertPanel } from './ui/convert-panel';

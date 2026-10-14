@@ -85,10 +85,33 @@ body { margin: 0; background: var(--bg); }
   font-weight: 500;
   color: var(--muted);
 }
-.card.is-locked { opacity: 0.6; }
 .card.is-locked .locked-label { display: inline; }
-/* Inert content can't be scrolled, so show every chapter and let the page scroll instead. */
-.card.is-locked .chapter-list { max-height: none; overflow: visible; }
+.lock-scope { border: 0; margin: 0; padding: 0; min-width: 0; }
+.lock-scope:disabled { opacity: 0.6; }
+.lock-scope:disabled .dropzone, .lock-scope:disabled .cover-button { cursor: default; }
+
+.status-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: grid;
+  gap: 6px;
+  padding: 10px 16px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 0.12);
+}
+.status-bar progress { height: 6px; }
+.status-bar-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .muted { color: var(--muted); }
 .small { font-size: 0.85rem; }

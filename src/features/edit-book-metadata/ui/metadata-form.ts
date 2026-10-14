@@ -1,7 +1,7 @@
 import { AUDIO_PRESETS, type BookMetadata, type BookStore } from '@/entities/book';
 import { tr, trAttr, type MessageKey } from '@/shared/i18n';
 import { normalizeCover } from '@/shared/lib/image';
-import { h } from '@/shared/ui';
+import { h, isLocked } from '@/shared/ui';
 
 type TextField = { key: keyof BookMetadata; label: MessageKey; placeholder?: MessageKey; multiline?: boolean; inputMode?: string };
 
@@ -65,12 +65,13 @@ export const createMetadataForm = (store: BookStore, { coverActions = [] }: Meta
     'title', 'cover.chooseHint');
   coverButton.addEventListener('dragover', (event) => {
     event.preventDefault();
-    coverButton.classList.add('is-over');
+    if (!isLocked(coverButton)) coverButton.classList.add('is-over');
   });
   coverButton.addEventListener('dragleave', () => coverButton.classList.remove('is-over'));
   coverButton.addEventListener('drop', (event) => {
     event.preventDefault();
     coverButton.classList.remove('is-over');
+    if (isLocked(coverButton)) return;
     const file = Array.from(event.dataTransfer?.files ?? []).find((candidate) => candidate.type.startsWith('image/'));
     if (file) void useImage(file);
   });

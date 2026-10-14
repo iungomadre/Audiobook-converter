@@ -12,25 +12,28 @@ const section = (step: number, title: MessageKey, content: HTMLElement) =>
     h('h2', {}, h('span', { class: 'step' }, step), tr(title), h('span', { class: 'locked-label' }, tr('section.locked'))),
     content);
 
-export const createConverterPage = (store: BookStore): HTMLElement => {
-  const editableSections = [
-    section(1, 'section.files', createBookSetup(store)),
-    section(2, 'section.details', createBookDetails(store)),
-  ];
+/** Wraps content in a fieldset so it can be locked: controls disabled, but still readable and scrollable. */
+const lockScope = (content: HTMLElement) => h('fieldset', { class: 'lock-scope' }, content);
 
-  // While converting, the book can be reviewed but not changed: `inert` blocks
-  // every click, tap and keyboard focus without hiding the content.
-  const setLocked = (locked: boolean) => {
-    for (const element of editableSections) {
-      element.inert = locked;
-      element.classList.toggle('is-locked', locked);
-    }
-  };
+export const createConverterPage = (store: BookStore): HTMLElement => {
+  const scopes = [lockScope(createBookSetup(store)), lockScope(createBookDetails(store))];
+  const editableSections = [section(1, 'section.files', scopes[0]), section(2, 'section.details', scopes[1])];
+
+  const { panel, statusBar } = createConvertPanel(store, {
+    onBusyChange: (busy) => {
+      // While converting, the book can be reviewed but not changed.
+      scopes.forEach((scope) => (scope.disabled = busy));
+      editableSections.forEach((element) => element.classList.toggle('is-locked', busy));
+      if (busy) convertSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    },
+  });
+  const convertSection = section(3, 'section.convert', panel);
 
   return h('main', { class: 'page' },
+    statusBar,
     // The language can change at any time, even mid-conversion: only the page text changes.
     createAppHeader([createLanguagePicker()]),
     ...editableSections,
-    section(3, 'section.convert', createConvertPanel(store, { onBusyChange: setLocked })),
+    convertSection,
   );
 };
