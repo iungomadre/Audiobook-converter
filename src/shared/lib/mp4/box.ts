@@ -1,4 +1,5 @@
 import { concat, fourCC, readFourCC, u32, view } from './bytes';
+import type { RandomAccessFile } from './random-access-file';
 
 /**
  * A parsed ISO-BMFF box. Container boxes keep their children; leaf boxes keep
@@ -65,6 +66,29 @@ export const serializeBox = (box: Box): Uint8Array => {
     ? concat([box.header ?? new Uint8Array(0), ...box.children.map(serializeBox)])
     : (box.payload ?? new Uint8Array(0));
   return concat([u32(body.length + 8), fourCC(box.type), body]);
+};
+
+/** Size of a box including its header (boxes written here never exceed 4 GB). */
+export const boxSize = (box: Box): number =>
+  8 + (box.children
+    ? (box.header?.length ?? 0) + box.children.reduce((sum, child) => sum + boxSize(child), 0)
+    : (box.payload?.length ?? 0));
+
+/**
+ * Writes a box tree straight into a file without first concatenating it in
+ * memory, which matters for the multi-megabyte sample tables of long books.
+ * Returns the offset just past the box.
+ */
+export const writeBox = (file: RandomAccessFile, offset: number, box: Box): number => {
+  file.write(offset, concat([u32(boxSize(box)), fourCC(box.type), box.header ?? new Uint8Array(0)]));
+  let position = offset + 8 + (box.header?.length ?? 0);
+  if (box.children) {
+    for (const child of box.children) position = writeBox(file, position, child);
+  } else if (box.payload) {
+    file.write(position, box.payload);
+    position += box.payload.length;
+  }
+  return position;
 };
 
 export const leaf = (type: string, parts: readonly Uint8Array[]): Box => ({ type, payload: concat(parts) });

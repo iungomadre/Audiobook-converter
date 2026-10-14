@@ -1,6 +1,6 @@
 import { getPreset, totalDuration, type BookStore } from '@/entities/book';
 import { formatBytes, formatDuration, sanitizeFileName } from '@/shared/lib/format';
-import { getOutputFile, saveFile } from '@/shared/lib/storage';
+import { getOutputFile, interruptedFlag, saveFile } from '@/shared/lib/storage';
 import { h } from '@/shared/ui';
 import { checkStorage, getUnsupportedReason } from '../lib/capabilities';
 import { createConversion, type ConversionState } from '../model/conversion';
@@ -11,8 +11,13 @@ const outputFileName = (store: BookStore): string => {
 };
 
 export const createConvertPanel = (store: BookStore): HTMLElement => {
+  const wasInterrupted = interruptedFlag.consume();
   const conversion = createConversion();
   const unsupported = getUnsupportedReason();
+  const interruptedNotice = h('p', { class: 'notice', hidden: !wasInterrupted, attrs: { role: 'alert' } },
+    'Your previous conversion was interrupted and the page was reloaded. On iPhone and iPad this happens when the ' +
+    'screen locks, you switch to another app, or Safari runs out of memory. Keep Safari open with the screen on ' +
+    'and try again.');
 
   const estimate = h('p', { class: 'muted' });
   const message = h('p', { attrs: { role: 'status' } });
@@ -32,6 +37,7 @@ export const createConvertPanel = (store: BookStore): HTMLElement => {
       const warning = await checkStorage((getPreset(book.presetId).bitrate / 8) * total);
       if (warning && !confirm(`${warning}\n\nTry anyway?`)) return;
     }
+    interruptedNotice.hidden = true;
     await conversion.start(book);
   });
 
@@ -91,11 +97,12 @@ export const createConvertPanel = (store: BookStore): HTMLElement => {
   store.subscribe(() => render(conversion.get()));
 
   return h('div', { class: 'convert' },
+    interruptedNotice,
     estimate,
     h('div', { class: 'row' }, convertButton, saveButton, cancelButton, againButton),
     progress,
     message,
     h('p', { class: 'muted small' },
-      'Everything happens on this device — your files are never uploaded. Keep this tab open while converting.'),
+      'Everything happens on this device — your files are never uploaded. Keep this tab open and in front while converting; on phones, keep the screen on.'),
   );
 };

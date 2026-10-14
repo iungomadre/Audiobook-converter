@@ -1,9 +1,9 @@
 import {
-  ALL_FORMATS, AudioSample, AudioSampleSink, AudioSampleSource, BlobSource, canEncodeAudio, Input, Mp4OutputFormat,
-  Output, StreamTarget, type MetadataTags,
+  AdtsOutputFormat, ALL_FORMATS, AudioSample, AudioSampleSink, AudioSampleSource, BlobSource, canEncodeAudio, Input,
+  NullTarget, Output,
 } from 'mediabunny';
 import { remixChannels, StreamingResampler, type PlanarPcm } from '@/shared/lib/audio';
-import { createFileWritable, finalizeAudiobook, type ChapterMarker, type RandomAccessFile } from '@/shared/lib/mp4';
+import { M4bWriter, type ChapterMarker, type M4bMetadata, type RandomAccessFile } from '@/shared/lib/mp4';
 import type { ConversionJob, ConversionProgress } from '../model/protocol';
 
 const SAMPLE_RATE = 44_100;
@@ -22,28 +22,18 @@ const ensureAacEncoder = async (numberOfChannels: number, bitrate: number): Prom
   return 'wasm';
 };
 
-export const buildMetadataTags = (job: ConversionJob): MetadataTags => {
+export const buildMetadata = (job: ConversionJob): M4bMetadata => {
   const { title, author, narrator, year, genre, description } = job.metadata;
-  const raw: NonNullable<MetadataTags['raw']> = {};
-  if (year) raw['©day'] = year;
-  if (narrator) {
-    raw['©nrt'] = narrator;
-    raw['©wrt'] = narrator; // Shown as "Composer" by iTunes-style apps; the common audiobook convention.
-  }
-  if (description) {
-    raw.desc = description;
-    raw.ldes = description;
-  }
-
   return {
-    title: title || undefined,
-    album: title || undefined,
-    artist: author || undefined,
-    albumArtist: author || undefined,
-    genre: genre || undefined,
-    description: description || undefined,
-    images: job.cover ? [{ data: job.cover.data, mimeType: job.cover.mimeType, kind: 'coverFront' }] : undefined,
-    raw,
+    title,
+    album: title,
+    artist: author,
+    albumArtist: author,
+    narrator,
+    year,
+    genre,
+    description,
+    cover: job.cover,
   };
 };
 
@@ -57,17 +47,28 @@ export const convertToM4b = async (
   onProgress: (progress: ConversionProgress) => void,
 ): Promise<{ durationSeconds: number; encoder: 'native' | 'wasm' }> => {
   const encoder = await ensureAacEncoder(job.numberOfChannels, job.bitrate);
-  file.truncate(0);
+  const writer = new M4bWriter(file, { sampleRate: SAMPLE_RATE, numberOfChannels: job.numberOfChannels, bitrate: job.bitrate });
 
-  const output = new Output({
-    format: new Mp4OutputFormat({ fastStart: false }),
-    target: new StreamTarget(createFileWritable(file), { chunked: true, chunkSize: 8 * 1024 * 1024 }),
-  });
+  // Mediabunny only encodes here. Its MP4 muxer keeps an object per packet in
+  // memory until the end, which on a 40-hour book is enough for iOS to kill
+  // the tab, so packets go to our own writer and Mediabunny's (lightweight,
+  // non-retaining) ADTS muxer writes into a NullTarget.
+  const output = new Output({ format: new AdtsOutputFormat(), target: new NullTarget() });
   // Mediabunny needs constant input parameters per track, so every file is
   // normalized to the same channel count and sample rate before encoding.
-  const source = new AudioSampleSource({ codec: 'aac', bitrate: job.bitrate });
-  output.addAudioTrack(source, { languageCode: 'und' });
-  output.setMetadataTags(buildMetadataTags(job));
+  const source = new AudioSampleSource({
+    codec: 'aac',
+    bitrate: job.bitrate,
+    onEncodedPacket: (packet, meta) => {
+      const description = meta?.decoderConfig?.description;
+      writer.addPacket(
+        packet.data,
+        Math.round(packet.duration * SAMPLE_RATE),
+        description ? toBytes(description) : undefined,
+      );
+    },
+  });
+  output.addAudioTrack(source);
   await output.start();
 
   const knownTotal = job.chapters.every((chapter) => chapter.durationSeconds !== null)
@@ -121,9 +122,14 @@ export const convertToM4b = async (
   }
 
   onProgress({ chapterIndex: job.chapters.length - 1, processedSeconds: position(), totalSeconds: knownTotal });
-  finalizeAudiobook(file, { chapters: markers });
-  return { durationSeconds: position(), encoder };
+  writer.finish({ chapters: markers, metadata: buildMetadata(job) });
+  return { durationSeconds: writer.durationSeconds, encoder };
 };
+
+const toBytes = (source: AllowSharedBufferSource): Uint8Array =>
+  ArrayBuffer.isView(source)
+    ? new Uint8Array(source.buffer, source.byteOffset, source.byteLength)
+    : new Uint8Array(source);
 
 const toPlanar = (sample: AudioSample): PlanarPcm =>
   Array.from({ length: sample.numberOfChannels }, (_, planeIndex) => {

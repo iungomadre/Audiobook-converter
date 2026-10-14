@@ -1,5 +1,5 @@
 import { getPreset, totalDuration, type Book } from '@/entities/book';
-import { clearOutputs } from '@/shared/lib/storage';
+import { clearOutputs, createScreenWakeLock, interruptedFlag } from '@/shared/lib/storage';
 import type { ConversionJob, ConversionProgress, WorkerRequest, WorkerResponse } from './protocol';
 
 export type ConversionState =
@@ -14,9 +14,17 @@ export const createConversion = () => {
   let state: ConversionState = { status: 'idle' };
   let worker: Worker | null = null;
   const listeners = new Set<Listener>();
+  const wakeLock = createScreenWakeLock();
 
   const set = (next: ConversionState) => {
     state = next;
+    if (state.status === 'running') {
+      wakeLock.enable();
+      interruptedFlag.set();
+    } else {
+      wakeLock.disable();
+      interruptedFlag.clear();
+    }
     for (const listener of listeners) listener(state);
   };
 

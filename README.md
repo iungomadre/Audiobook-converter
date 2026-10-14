@@ -26,9 +26,17 @@ server: decoding, AAC encoding and MP4 writing all run on your device.
    `@mediabunny/aac-encoder` (FFmpeg's encoder compiled to WebAssembly) where
    none exists, e.g. Firefox and Chrome on Linux. That ~1 MB module is only
    downloaded when needed.
-4. The MP4 is written to OPFS, then `src/shared/lib/mp4` adds the chapter
-   track, `chpl` and audiobook flag by rewriting only the `moov` box.
+4. Our own streaming writer (`src/shared/lib/mp4`) puts every AAC packet
+   straight into a file in the Origin Private File System and keeps only a
+   4-byte size per packet in memory (~25 MB for 40 hours). At the end it
+   appends the QuickTime chapter track, the Nero `chpl` list, the iTunes tags
+   and the audiobook flag. (Mediabunny's own MP4 muxer keeps an object per
+   packet until the end, which made iOS kill the tab on long books.)
 5. The file is saved via the File System Access save dialog, or a download.
+
+On phones the screen is kept awake during conversion (Screen Wake Lock), and
+if the page is reloaded mid-conversion — iOS does this silently when a tab is
+killed — the app says so instead of just showing an empty form.
 
 ## Browser support
 
@@ -65,7 +73,7 @@ src/
   entities/
     book/                 book model, store, audio presets
   shared/
-    lib/mp4/              MP4 box parsing + chapter/audiobook finalizer
+    lib/mp4/              streaming M4B writer (chapters, tags, cover)
     lib/audio/            channel remixing and streaming resampler
     lib/storage/          OPFS and file saving
     lib/…                 natural sort, formatting, media probing, images
