@@ -68,6 +68,8 @@ export const zhCN: Messages = {
   'convert.tryAnyway': '仍然尝试？',
   'convert.resumeAvailable': '由于页面重新加载，转换在完成 {total} 个章节中的 {done} 个后停止——iPhone 和 iPad 会在页面占用大量内存或锁屏时这样做。重新选择相同的文件，转换会自动继续。图书信息、封面和章节标题都已保留。',
   'convert.resumeReady': '{total} 个章节中已有 {done} 个转换完成——点击“生成 M4B”将从此处继续。',
+  'convert.differentFiles': '这些不是中断的转换所用的文件（已完成 {total} 个章节中的 {done} 个）。请选择正确的文件以继续，或用所选文件开始新的转换。',
+  'convert.startNew': '用这些文件开始新的转换',
   'convert.defaultFileName': '有声书',
 
   'error.noOpfs': '此浏览器无法在本地存储大文件（不支持 Origin Private File System）。',

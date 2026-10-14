@@ -1,4 +1,4 @@
-import { getPreset, totalDuration, type BookStore } from '@/entities/book';
+import { forgetRememberedChapters, getPreset, setConversionPending, totalDuration, type BookStore } from '@/entities/book';
 import { onLanguageChange, t, tr } from '@/shared/i18n';
 import { formatBytes, formatDuration, sanitizeFileName } from '@/shared/lib/format';
 import { getOutputFile, interruptedFlag, saveFile } from '@/shared/lib/storage';
@@ -17,6 +17,8 @@ const describeError = ({ key, params, message }: ErrorInfo): string => (key ? t(
 type ConvertPanelOptions = {
   /** Called when a conversion starts (true) or stops for any reason (false). */
   onBusyChange?: (busy: boolean) => void;
+  /** Called when the user drops an unfinished conversion to start anew with the files now picked. */
+  onStartFresh?: () => void;
 };
 
 export type ConvertPanel = {
@@ -29,7 +31,7 @@ export type ConvertPanel = {
   discard: () => void;
 };
 
-export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPanelOptions = {}): ConvertPanel => {
+export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFresh }: ConvertPanelOptions = {}): ConvertPanel => {
   const wasInterrupted = interruptedFlag.consume();
   const conversion = createConversion();
   const unsupported = getUnsupportedReason();
@@ -37,7 +39,10 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
 
   const interruptedNotice = h('p', { class: 'notice', hidden: true, attrs: { role: 'alert' } }, tr('convert.interrupted'));
   const resumeNotice = h('p', { class: 'notice', attrs: { role: 'alert' } });
-  const banner = h('div', { class: 'banner' }, interruptedNotice, resumeNotice);
+  const startFreshButton = h('button', { type: 'button', class: 'btn small' }, tr('convert.startNew'));
+  const differentFilesNotice = h('div', { class: 'notice', attrs: { role: 'alert' } },
+    h('p', {}), startFreshButton);
+  const banner = h('div', { class: 'banner' }, interruptedNotice, resumeNotice, differentFilesNotice);
   // After a reload that interrupted a conversion, picking the same files again continues it right away.
   let autoContinue = conversion.savedProgress() !== null && !unsupported;
   let showInterrupted = wasInterrupted && !autoContinue;
@@ -100,8 +105,11 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
     const idle = state.status === 'idle' || state.status === 'error';
     const resumable = idle ? conversion.resumableFor(store.get()) : null;
     const saved = idle && !resumable ? conversion.savedProgress() : null;
-    resumeNotice.hidden = !saved;
+    const differentFiles = !!saved && conversion.isDifferentBook(store.get());
+    resumeNotice.hidden = !saved || differentFiles;
     if (saved) resumeNotice.textContent = t('convert.resumeAvailable', saved);
+    differentFilesNotice.hidden = !differentFiles;
+    if (saved && differentFiles) differentFilesNotice.firstElementChild!.textContent = t('convert.differentFiles', saved);
     interruptedNotice.hidden = !showInterrupted || state.status !== 'idle';
 
     estimate.hidden = running || state.status === 'done' || chapters.length === 0;
@@ -138,6 +146,14 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
   };
 
   conversion.subscribe(render);
+  // Remember across reloads whether a conversion of these chapters is unfinished.
+  let previousStatus = conversion.get().status;
+  conversion.subscribe(({ status }) => {
+    if (status === previousStatus) return;
+    if (status === 'running') setConversionPending(store, true);
+    else if (status === 'done' || (status === 'idle' && previousStatus === 'running')) setConversionPending(store, false);
+    previousStatus = status;
+  });
   let busy = false;
   conversion.subscribe((state) => {
     if ((state.status === 'running') === busy) return;
@@ -176,7 +192,16 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
     showInterrupted = false;
     saveError = null;
     conversion.cancel();
+    setConversionPending(store, false);
   };
+
+  // Different files than the unfinished conversion: drop its progress and start anew with these.
+  startFreshButton.addEventListener('click', () => {
+    discard();
+    forgetRememberedChapters();
+    onStartFresh?.();
+    render(conversion.get());
+  });
 
   return { panel, statusBar, banner, discard };
 };

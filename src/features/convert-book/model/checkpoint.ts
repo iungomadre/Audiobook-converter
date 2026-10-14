@@ -1,8 +1,6 @@
 import { getOutputDirectory } from '@/shared/lib/storage';
 
-const KEY = 'audiobook-converter:checkpoint';
-
-type FileFingerprint = { name: string; size: number; lastModified: number };
+const KEY = 'audiobook-converter:checkpoint-v2';
 
 /**
  * What survives a reload of the page: which chapters of which conversion are
@@ -14,13 +12,12 @@ export type Checkpoint = {
   outputName: string;
   numberOfChannels: number;
   bitrate: number;
-  files: FileFingerprint[];
+  /** Content fingerprints of the input files, in chapter order. */
+  files: string[];
   /** Indices of finished chapters. */
   done: number[];
   audioSpecificConfig: number[] | null;
 };
-
-const fingerprint = (file: File): FileFingerprint => ({ name: file.name, size: file.size, lastModified: file.lastModified });
 
 export const partName = (outputName: string, index: number) => `${outputName}.part${index}`;
 export const sizesName = (outputName: string, index: number) => `${partName(outputName, index)}.sizes`;
@@ -51,19 +48,16 @@ export const checkpoint = {
     }
   },
 
-  create(outputName: string, files: File[], numberOfChannels: number, bitrate: number): Checkpoint {
-    return { outputName, numberOfChannels, bitrate, files: files.map(fingerprint), done: [], audioSpecificConfig: null };
+  create(outputName: string, fileKeys: string[], numberOfChannels: number, bitrate: number): Checkpoint {
+    return { outputName, numberOfChannels, bitrate, files: fileKeys, done: [], audioSpecificConfig: null };
   },
 
-  /** True if `value` belongs to the same files (in the same order) and audio settings. */
-  matches(value: Checkpoint, files: File[], numberOfChannels: number, bitrate: number): boolean {
+  /** True if `value` belongs to the same files (by content, in the same order) and audio settings. */
+  matches(value: Checkpoint, fileKeys: string[], numberOfChannels: number, bitrate: number): boolean {
     return value.numberOfChannels === numberOfChannels
       && value.bitrate === bitrate
-      && value.files.length === files.length
-      && files.every((file, index) => {
-        const saved = value.files[index];
-        return saved.name === file.name && saved.size === file.size && saved.lastModified === file.lastModified;
-      });
+      && value.files.length === fileKeys.length
+      && fileKeys.every((key, index) => value.files[index] === key);
   },
 };
 

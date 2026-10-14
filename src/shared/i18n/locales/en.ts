@@ -69,6 +69,8 @@ export const en = {
   'convert.tryAnyway': 'Try anyway?',
   'convert.resumeAvailable': 'The conversion stopped after {done} of {total} chapters because the page was reloaded — iPhone and iPad do this when a page uses a lot of memory or the screen locks. Choose the same files again and it continues automatically. Your book details, cover and chapter titles are kept.',
   'convert.resumeReady': '{done} of {total} chapters are already converted — “Create M4B” continues from there.',
+  'convert.differentFiles': 'These aren\'t the files of the interrupted conversion ({done} of {total} chapters done). Choose the right files to continue it, or start a new conversion with the files you picked.',
+  'convert.startNew': 'Start new conversion with these files',
   'convert.defaultFileName': 'Audiobook',
 
   'error.noOpfs': 'This browser cannot store large files locally (no Origin Private File System).',

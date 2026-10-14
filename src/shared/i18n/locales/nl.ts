@@ -68,6 +68,8 @@ export const nl: Messages = {
   'convert.tryAnyway': 'Toch proberen?',
   'convert.resumeAvailable': 'De conversie stopte na {done} van {total} hoofdstukken omdat de pagina opnieuw werd geladen — iPhone en iPad doen dat als een pagina veel geheugen gebruikt of het scherm vergrendelt. Kies dezelfde bestanden opnieuw en hij gaat automatisch verder. Boekgegevens, omslag en hoofdstuktitels blijven bewaard.',
   'convert.resumeReady': '{done} van {total} hoofdstukken zijn al geconverteerd — ‘M4B maken’ gaat daar verder.',
+  'convert.differentFiles': 'Dit zijn niet de bestanden van de onderbroken conversie ({done} van {total} hoofdstukken klaar). Kies de juiste bestanden om verder te gaan, of begin een nieuwe conversie met de gekozen bestanden.',
+  'convert.startNew': 'Nieuwe conversie met deze bestanden',
   'convert.defaultFileName': 'Luisterboek',
 
   'error.noOpfs': 'Deze browser kan geen grote bestanden lokaal opslaan (geen Origin Private File System).',

@@ -68,6 +68,8 @@ export const ja: Messages = {
   'convert.tryAnyway': 'それでも試しますか？',
   'convert.resumeAvailable': 'ページが再読み込みされたため、{total} チャプター中 {done} チャプターで変換が止まりました。iPhone や iPad は、ページが大量のメモリを使ったときや画面がロックされたときにこうなります。同じファイルをもう一度選ぶと自動的に続きから再開します。本の情報、カバー、チャプタータイトルは保持されています。',
   'convert.resumeReady': '{total} チャプター中 {done} チャプターは変換済みです。「M4B を作成」で続きから再開します。',
+  'convert.differentFiles': 'これらは中断された変換のファイルではありません（{total} チャプター中 {done} チャプター完了）。続けるには正しいファイルを選ぶか、選んだファイルで新しい変換を始めてください。',
+  'convert.startNew': 'これらのファイルで新しく変換する',
   'convert.defaultFileName': 'オーディオブック',
 
   'error.noOpfs': 'このブラウザーは大きなファイルをローカルに保存できません（Origin Private File System がありません）。',

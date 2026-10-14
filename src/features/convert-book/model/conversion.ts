@@ -84,7 +84,7 @@ export const createConversion = () => {
       if (id !== runId) throw new Cancelled();
     };
     const preset = getPreset(book.presetId);
-    const files = book.chapters.map((chapter) => chapter.file);
+    const files = book.chapters.map((chapter) => chapter.key);
 
     // Continue an interrupted conversion of the same files, or start from scratch.
     let saved: Checkpoint | null = checkpoint.load();
@@ -236,16 +236,25 @@ export const createConversion = () => {
   const resumableFor = (book: Book): { done: number; total: number } | null => {
     const saved = checkpoint.load();
     const preset = getPreset(book.presetId);
-    const files = book.chapters.map((chapter) => chapter.file);
+    const files = book.chapters.map((chapter) => chapter.key);
     return saved && saved.done.length > 0 && checkpoint.matches(saved, files, preset.numberOfChannels, preset.bitrate)
       ? { done: saved.done.length, total: saved.files.length }
       : null;
+  };
+
+  /** True if `book` has files but they are not the files of the saved, unfinished conversion. */
+  const isDifferentBook = (book: Book): boolean => {
+    const saved = checkpoint.load();
+    if (!saved || saved.done.length === 0 || book.chapters.length === 0) return false;
+    const keys = book.chapters.map((chapter) => chapter.key);
+    return keys.length !== saved.files.length || keys.some((key, index) => key !== saved.files[index]);
   };
 
   return {
     get: () => state,
     savedProgress,
     resumableFor,
+    isDifferentBook,
     subscribe: (listener: Listener) => {
       listeners.add(listener);
       listener(state);

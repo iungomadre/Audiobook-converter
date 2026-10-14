@@ -3,6 +3,8 @@ import type { MessageKey } from '@/shared/i18n';
 export type Chapter = {
   id: string;
   file: File;
+  /** Content fingerprint (see `contentKey`), so the same file is recognized after a reload. */
+  key: string;
   /** Path inside the picked folder, or the file name. */
   path: string;
   title: string;

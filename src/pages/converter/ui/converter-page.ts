@@ -1,5 +1,6 @@
 import { clearDraft, type BookStore } from '@/entities/book';
 import { createConvertPanel } from '@/features/convert-book';
+import { refillDetailsFromFiles } from '@/features/select-audio-files';
 import { createLanguagePicker } from '@/features/select-language';
 import { t, tr, type MessageKey } from '@/shared/i18n';
 import { h } from '@/shared/ui';
@@ -26,6 +27,7 @@ export const createConverterPage = (store: BookStore): HTMLElement => {
       editableSections.forEach((element) => element.classList.toggle('is-locked', busy));
       if (busy) convertSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
     },
+    onStartFresh: () => void refillDetailsFromFiles(store),
   });
   const convertSection = section(3, 'section.convert', panel);
 

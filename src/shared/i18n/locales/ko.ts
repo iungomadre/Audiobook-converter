@@ -68,6 +68,8 @@ export const ko: Messages = {
   'convert.tryAnyway': '그래도 시도할까요?',
   'convert.resumeAvailable': '페이지가 다시 로드되어 챕터 {total}개 중 {done}개에서 변환이 멈췄습니다. iPhone과 iPad는 페이지가 메모리를 많이 쓰거나 화면이 잠기면 이렇게 합니다. 같은 파일을 다시 선택하면 자동으로 이어서 진행합니다. 책 정보, 표지, 챕터 제목은 그대로 유지됩니다.',
   'convert.resumeReady': '챕터 {total}개 중 {done}개는 이미 변환되었습니다. “M4B 만들기”를 누르면 이어서 진행합니다.',
+  'convert.differentFiles': '중단된 변환의 파일이 아닙니다(챕터 {total}개 중 {done}개 완료). 이어서 하려면 올바른 파일을 선택하거나, 선택한 파일로 새 변환을 시작하세요.',
+  'convert.startNew': '이 파일로 새 변환 시작',
   'convert.defaultFileName': '오디오북',
 
   'error.noOpfs': '이 브라우저는 큰 파일을 로컬에 저장할 수 없습니다(Origin Private File System 미지원).',

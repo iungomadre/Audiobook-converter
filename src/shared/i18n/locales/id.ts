@@ -68,6 +68,8 @@ export const id: Messages = {
   'convert.tryAnyway': 'Tetap coba?',
   'convert.resumeAvailable': 'Konversi berhenti setelah {done} dari {total} bab karena halaman dimuat ulang — iPhone dan iPad melakukannya saat halaman memakai banyak memori atau layar terkunci. Pilih file yang sama lagi dan konversi akan berlanjut otomatis. Detail buku, sampul, dan judul bab tetap tersimpan.',
   'convert.resumeReady': '{done} dari {total} bab sudah dikonversi — “Buat M4B” melanjutkan dari sana.',
+  'convert.differentFiles': 'Ini bukan file dari konversi yang terputus ({done} dari {total} bab selesai). Pilih file yang benar untuk melanjutkannya, atau mulai konversi baru dengan file yang Anda pilih.',
+  'convert.startNew': 'Mulai konversi baru dengan file ini',
   'convert.defaultFileName': 'Buku audio',
 
   'error.noOpfs': 'Browser ini tidak dapat menyimpan file besar secara lokal (tidak ada Origin Private File System).',

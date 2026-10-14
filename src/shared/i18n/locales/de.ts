@@ -68,6 +68,8 @@ export const de: Messages = {
   'convert.tryAnyway': 'Trotzdem versuchen?',
   'convert.resumeAvailable': 'Die Konvertierung wurde nach {done} von {total} Kapiteln gestoppt, weil die Seite neu geladen wurde – iPhone und iPad tun das, wenn eine Seite viel Speicher braucht oder sich der Bildschirm sperrt. Wähle dieselben Dateien erneut, dann geht es automatisch weiter. Buchdetails, Cover und Kapiteltitel bleiben erhalten.',
   'convert.resumeReady': '{done} von {total} Kapiteln sind bereits konvertiert – „M4B erstellen“ macht dort weiter.',
+  'convert.differentFiles': 'Das sind nicht die Dateien der unterbrochenen Konvertierung ({done} von {total} Kapiteln fertig). Wähle die richtigen Dateien, um sie fortzusetzen, oder starte eine neue Konvertierung mit den gewählten Dateien.',
+  'convert.startNew': 'Neue Konvertierung mit diesen Dateien',
   'convert.defaultFileName': 'Hörbuch',
 
   'error.noOpfs': 'Dieser Browser kann keine großen Dateien lokal speichern (kein Origin Private File System).',

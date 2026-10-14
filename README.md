@@ -51,8 +51,11 @@ the tab after a few gigabytes, silently reloading the page. Finished chapter
 parts therefore stay on the device together with their packet sizes, and a
 small checkpoint in `localStorage` records which chapters are done. After a
 reload a banner at the top says how far it got; choosing the same files again
-(same names, sizes and dates, same audio quality) continues automatically with
-the remaining chapters. The result is identical to an uninterrupted run.
+(same content and audio quality) continues automatically with the remaining
+chapters. Files are recognized by a cheap content fingerprint — size plus a
+SHA-256 of the first and last 64 KB — so renamed or re-copied files still
+match, while different recordings don't. Picking other files shows a warning:
+choose the right ones, or start a new conversion with the picked files. The result is identical to an uninterrupted run.
 Browsers forget picked files on reload, so that one step can't be automated.
 
 **Remembered between sessions** (IndexedDB): book details, cover, audio

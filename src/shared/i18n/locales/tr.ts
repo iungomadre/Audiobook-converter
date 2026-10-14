@@ -68,6 +68,8 @@ export const tr: Messages = {
   'convert.tryAnyway': 'Yine de denensin mi?',
   'convert.resumeAvailable': 'Sayfa yeniden yüklendiği için dönüştürme {total} bölümden {done} tanesinden sonra durdu — iPhone ve iPad, bir sayfa çok bellek kullandığında veya ekran kilitlendiğinde bunu yapar. Aynı dosyaları yeniden seçin, dönüştürme otomatik olarak devam eder. Kitap bilgileri, kapak ve bölüm başlıkları korunur.',
   'convert.resumeReady': '{total} bölümden {done} tanesi zaten dönüştürüldü — “M4B oluştur” kaldığı yerden devam eder.',
+  'convert.differentFiles': 'Bunlar yarıda kalan dönüştürmenin dosyaları değil ({total} bölümden {done} tanesi hazır). Devam etmek için doğru dosyaları seçin ya da seçtiğiniz dosyalarla yeni bir dönüştürme başlatın.',
+  'convert.startNew': 'Bu dosyalarla yeni dönüştürme başlat',
   'convert.defaultFileName': 'Sesli kitap',
 
   'error.noOpfs': 'Bu tarayıcı büyük dosyaları yerel olarak saklayamıyor (Origin Private File System yok).',

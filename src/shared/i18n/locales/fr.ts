@@ -68,6 +68,8 @@ export const fr: Messages = {
   'convert.tryAnyway': 'Essayer quand même ?',
   'convert.resumeAvailable': 'La conversion s’est arrêtée après {done} chapitres sur {total} parce que la page a été rechargée — l’iPhone et l’iPad le font quand une page utilise beaucoup de mémoire ou que l’écran se verrouille. Choisissez à nouveau les mêmes fichiers et elle reprendra automatiquement. Les informations du livre, la couverture et les titres des chapitres sont conservés.',
   'convert.resumeReady': '{done} chapitres sur {total} sont déjà convertis — « Créer le M4B » reprend à partir de là.',
+  'convert.differentFiles': 'Ce ne sont pas les fichiers de la conversion interrompue ({done} chapitres sur {total} terminés). Choisissez les bons fichiers pour la poursuivre, ou lancez une nouvelle conversion avec les fichiers choisis.',
+  'convert.startNew': 'Nouvelle conversion avec ces fichiers',
   'convert.defaultFileName': 'Livre audio',
 
   'error.noOpfs': 'Ce navigateur ne peut pas stocker de gros fichiers localement (Origin Private File System absent).',

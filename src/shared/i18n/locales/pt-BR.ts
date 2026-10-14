@@ -68,6 +68,8 @@ export const ptBR: Messages = {
   'convert.tryAnyway': 'Tentar mesmo assim?',
   'convert.resumeAvailable': 'A conversão parou após {done} de {total} capítulos porque a página foi recarregada — o iPhone e o iPad fazem isso quando uma página usa muita memória ou a tela bloqueia. Escolha os mesmos arquivos de novo e ela continuará automaticamente. Os detalhes do livro, a capa e os títulos dos capítulos foram mantidos.',
   'convert.resumeReady': '{done} de {total} capítulos já estão convertidos — “Criar M4B” continua de onde parou.',
+  'convert.differentFiles': 'Estes não são os arquivos da conversão interrompida ({done} de {total} capítulos prontos). Escolha os arquivos certos para continuá-la ou comece uma nova conversão com os arquivos escolhidos.',
+  'convert.startNew': 'Nova conversão com estes arquivos',
   'convert.defaultFileName': 'Audiolivro',
 
   'error.noOpfs': 'Este navegador não consegue armazenar arquivos grandes localmente (sem Origin Private File System).',
