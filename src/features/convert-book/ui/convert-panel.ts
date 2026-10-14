@@ -21,6 +21,9 @@ type ConvertPanelOptions = {
   onStartFresh?: () => void;
 };
 
+/** Upper bound of the pinned status bar's height, in CSS pixels. */
+const STATUS_BAR_MAX_HEIGHT = 80;
+
 export type ConvertPanel = {
   panel: HTMLElement;
   /** Slim progress bar for the top of the screen, shown while converting and the panel is out of view. */
@@ -29,6 +32,8 @@ export type ConvertPanel = {
   banner: HTMLElement;
   /** Cancels any conversion and deletes its unfinished work. */
   discard: () => void;
+  /** True if an unfinished conversion is saved on the device. */
+  hasSavedProgress: () => boolean;
 };
 
 export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFresh }: ConvertPanelOptions = {}): ConvertPanel => {
@@ -100,7 +105,12 @@ export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFres
     cancelButton.hidden = !running;
     saveButton.hidden = againButton.hidden = state.status !== 'done';
     progress.hidden = !running;
-    statusBar.hidden = !running || panelVisible;
+    const showStatusBar = running && !panelVisible;
+    if (statusBar.hidden === showStatusBar) {
+      statusBar.hidden = !showStatusBar;
+      // Make room at the top of the page so the bar never covers the title or anything else.
+      document.documentElement.style.setProperty('--status-bar-space', showStatusBar ? `${statusBar.offsetHeight}px` : '0px');
+    }
 
     const idle = state.status === 'idle' || state.status === 'error';
     const resumable = idle ? conversion.resumableFor(store.get()) : null;
@@ -181,10 +191,11 @@ export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFres
   );
 
   // Show the top status bar only while the progress in the panel is scrolled out of view.
+  // Progress hidden under the bar counts as out of view, so adding the page padding can't make the bar flicker.
   new IntersectionObserver(([entry]) => {
     panelVisible = entry.isIntersecting;
     render(conversion.get());
-  }).observe(progress);
+  }, { rootMargin: `-${STATUS_BAR_MAX_HEIGHT}px 0px 0px 0px` }).observe(progress);
   statusBar.addEventListener('click', () => panel.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 
   const discard = () => {
@@ -203,5 +214,5 @@ export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFres
     render(conversion.get());
   });
 
-  return { panel, statusBar, banner, discard };
+  return { panel, statusBar, banner, discard, hasSavedProgress: () => conversion.savedProgress() !== null };
 };

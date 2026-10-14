@@ -1,4 +1,4 @@
-import { clearDraft, type BookStore } from '@/entities/book';
+import { clearDraft, hasRememberedChapters, type Book, type BookStore } from '@/entities/book';
 import { createConvertPanel } from '@/features/convert-book';
 import { refillDetailsFromFiles } from '@/features/select-audio-files';
 import { createLanguagePicker } from '@/features/select-language';
@@ -7,6 +7,12 @@ import { h } from '@/shared/ui';
 import { createAppHeader } from '@/widgets/app-header';
 import { createBookDetails } from '@/widgets/book-details';
 import { createBookSetup } from '@/widgets/book-setup';
+
+/** True if the user entered or picked anything (the genre has a default and doesn't count). */
+const hasContent = (book: Book): boolean => {
+  const { title, author, narrator, year, description } = book.metadata;
+  return book.chapters.length > 0 || book.cover !== null || [title, author, narrator, year, description].some(Boolean);
+};
 
 const section = (step: number, title: MessageKey, content: HTMLElement) =>
   h('section', { class: 'card' },
@@ -20,12 +26,13 @@ export const createConverterPage = (store: BookStore): HTMLElement => {
   const scopes = [lockScope(createBookSetup(store)), lockScope(createBookDetails(store))];
   const editableSections = [section(1, 'section.files', scopes[0]), section(2, 'section.details', scopes[1])];
 
-  const { panel, statusBar, banner, discard } = createConvertPanel(store, {
+  const { panel, statusBar, banner, discard, hasSavedProgress } = createConvertPanel(store, {
     onBusyChange: (busy) => {
       // While converting, the book can be reviewed but not changed.
       scopes.forEach((scope) => (scope.disabled = busy));
       editableSections.forEach((element) => element.classList.toggle('is-locked', busy));
       if (busy) convertSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      updateStartOver();
     },
     onStartFresh: () => void refillDetailsFromFiles(store),
   });
@@ -38,8 +45,15 @@ export const createConverterPage = (store: BookStore): HTMLElement => {
     discard();
     void clearDraft();
     store.reset();
+    updateStartOver();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+
+  // Offer "Start over" only when there is something to clear.
+  const updateStartOver = () => {
+    startOver.hidden = !(hasContent(store.get()) || hasRememberedChapters() || hasSavedProgress());
+  };
+  store.subscribe(updateStartOver);
 
   return h('main', { class: 'page' },
     statusBar,
