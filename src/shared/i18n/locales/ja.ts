@@ -64,6 +64,8 @@ export const ja: Messages = {
   'convert.interrupted': '前回の変換は中断され、ページが再読み込みされました。iPhone や iPad では、画面がロックされたとき、別のアプリに切り替えたとき、または Safari のメモリが不足したときに起こります。画面をオンにしたまま Safari を開いておき、もう一度お試しください。',
   'convert.lowStorage': 'この本を保存するためのブラウザーの空き容量が不足している可能性があります。空き容量を増やしてから、もう一度お試しください。',
   'convert.tryAnyway': 'それでも試しますか？',
+  'convert.resumeAvailable': 'ページが再読み込みされる前に、{total} チャプター中 {done} チャプターの変換が完了していました。同じファイルをもう一度選び、「M4B を作成」を押すと続きから再開します。',
+  'convert.resumeReady': '{total} チャプター中 {done} チャプターは変換済みです。「M4B を作成」で続きから再開します。',
   'convert.defaultFileName': 'オーディオブック',
 
   'error.noOpfs': 'このブラウザーは大きなファイルをローカルに保存できません（Origin Private File System がありません）。',

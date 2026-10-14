@@ -64,6 +64,8 @@ export const fr: Messages = {
   'convert.interrupted': 'La conversion précédente a été interrompue et la page rechargée. Sur iPhone et iPad, cela arrive quand l’écran se verrouille, que vous passez à une autre app ou que Safari manque de mémoire. Gardez Safari ouvert avec l’écran allumé et réessayez.',
   'convert.lowStorage': 'Votre appareil n’a peut-être pas assez d’espace libre dans le navigateur pour ce livre. Libérez de l’espace et réessayez.',
   'convert.tryAnyway': 'Essayer quand même ?',
+  'convert.resumeAvailable': '{done} chapitres sur {total} ont été convertis avant le rechargement de la page. Choisissez à nouveau les mêmes fichiers et appuyez sur « Créer le M4B » pour reprendre à cet endroit.',
+  'convert.resumeReady': '{done} chapitres sur {total} sont déjà convertis — « Créer le M4B » reprend à partir de là.',
   'convert.defaultFileName': 'Livre audio',
 
   'error.noOpfs': 'Ce navigateur ne peut pas stocker de gros fichiers localement (Origin Private File System absent).',

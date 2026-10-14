@@ -64,6 +64,8 @@ export const ptBR: Messages = {
   'convert.interrupted': 'A conversão anterior foi interrompida e a página foi recarregada. No iPhone e no iPad isso acontece quando a tela bloqueia, você muda para outro app ou o Safari fica sem memória. Mantenha o Safari aberto com a tela ligada e tente de novo.',
   'convert.lowStorage': 'Seu dispositivo pode não ter espaço livre suficiente no navegador para este livro. Libere espaço e tente de novo.',
   'convert.tryAnyway': 'Tentar mesmo assim?',
+  'convert.resumeAvailable': '{done} de {total} capítulos foram convertidos antes de a página recarregar. Escolha os mesmos arquivos de novo e toque em “Criar M4B” para continuar de onde parou.',
+  'convert.resumeReady': '{done} de {total} capítulos já estão convertidos — “Criar M4B” continua de onde parou.',
   'convert.defaultFileName': 'Audiolivro',
 
   'error.noOpfs': 'Este navegador não consegue armazenar arquivos grandes localmente (sem Origin Private File System).',

@@ -64,6 +64,8 @@ export const id: Messages = {
   'convert.interrupted': 'Konversi sebelumnya terputus dan halaman dimuat ulang. Di iPhone dan iPad hal ini terjadi saat layar terkunci, Anda beralih ke aplikasi lain, atau Safari kehabisan memori. Biarkan Safari terbuka dengan layar menyala, lalu coba lagi.',
   'convert.lowStorage': 'Perangkat Anda mungkin tidak memiliki cukup ruang penyimpanan browser untuk buku ini. Kosongkan sedikit ruang, lalu coba lagi.',
   'convert.tryAnyway': 'Tetap coba?',
+  'convert.resumeAvailable': '{done} dari {total} bab sudah dikonversi sebelum halaman dimuat ulang. Pilih file yang sama lagi lalu tekan “Buat M4B” untuk melanjutkan dari sana.',
+  'convert.resumeReady': '{done} dari {total} bab sudah dikonversi — “Buat M4B” melanjutkan dari sana.',
   'convert.defaultFileName': 'Buku audio',
 
   'error.noOpfs': 'Browser ini tidak dapat menyimpan file besar secara lokal (tidak ada Origin Private File System).',

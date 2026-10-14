@@ -32,6 +32,7 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
   let saveError: string | null = null;
 
   const interruptedNotice = h('p', { class: 'notice', hidden: !wasInterrupted, attrs: { role: 'alert' } }, tr('convert.interrupted'));
+  const resumeNotice = h('p', { class: 'notice' });
   const estimate = h('p', { class: 'muted' });
   const message = h('p', { attrs: { role: 'status' } });
   const progressBar = h('progress', { max: 1, value: 0 });
@@ -55,6 +56,7 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
       if (!confirm(`${t('convert.lowStorage')}\n\n${t('convert.tryAnyway')}`)) return;
     }
     interruptedNotice.hidden = true;
+    resumeNotice.hidden = true;
     saveError = null;
     await conversion.start(book);
   });
@@ -87,10 +89,17 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
     progress.hidden = !running;
     statusBar.hidden = !running || panelVisible;
 
+    const idle = state.status === 'idle' || state.status === 'error';
+    const resumable = idle ? conversion.resumableFor(store.get()) : null;
+    const saved = idle && !resumable ? conversion.savedProgress() : null;
+    resumeNotice.hidden = !saved;
+    if (saved) resumeNotice.textContent = t('convert.resumeAvailable', saved);
+
     estimate.hidden = running || state.status === 'done' || chapters.length === 0;
-    estimate.textContent = total === null
-      ? ''
-      : t('convert.estimate', { length: formatDuration(total), size: formatBytes((preset.bitrate / 8) * total) });
+    estimate.textContent = [
+      total === null ? '' : t('convert.estimate', { length: formatDuration(total), size: formatBytes((preset.bitrate / 8) * total) }),
+      resumable ? t('convert.resumeReady', resumable) : '',
+    ].filter(Boolean).join(' · ');
 
     message.className = state.status === 'error' || unsupported || saveError ? 'error' : '';
     if (unsupported) message.textContent = t(unsupported);
@@ -132,6 +141,7 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
 
   const panel = h('div', { class: 'convert' },
     interruptedNotice,
+    resumeNotice,
     estimate,
     h('div', { class: 'row' }, convertButton, saveButton, cancelButton, againButton),
     progress,

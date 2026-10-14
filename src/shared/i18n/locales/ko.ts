@@ -64,6 +64,8 @@ export const ko: Messages = {
   'convert.interrupted': '이전 변환이 중단되어 페이지가 다시 로드되었습니다. iPhone과 iPad에서는 화면이 잠기거나, 다른 앱으로 전환하거나, Safari의 메모리가 부족할 때 이런 일이 생깁니다. 화면을 켠 채로 Safari를 열어 두고 다시 시도하세요.',
   'convert.lowStorage': '이 책을 저장할 브라우저 저장 공간이 부족할 수 있습니다. 공간을 확보한 뒤 다시 시도하세요.',
   'convert.tryAnyway': '그래도 시도할까요?',
+  'convert.resumeAvailable': '페이지가 다시 로드되기 전에 챕터 {total}개 중 {done}개가 변환되었습니다. 같은 파일을 다시 선택하고 “M4B 만들기”를 누르면 이어서 진행합니다.',
+  'convert.resumeReady': '챕터 {total}개 중 {done}개는 이미 변환되었습니다. “M4B 만들기”를 누르면 이어서 진행합니다.',
   'convert.defaultFileName': '오디오북',
 
   'error.noOpfs': '이 브라우저는 큰 파일을 로컬에 저장할 수 없습니다(Origin Private File System 미지원).',

@@ -34,6 +34,10 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
       const part = await openTracked(data.partName);
       const result = await encodeChapter(data.settings, data.file, fromSyncAccessHandle(part), (seconds) =>
         post({ type: 'progress', processedSeconds: seconds }));
+      // Saved so a later session can reuse this chapter after the page was reloaded.
+      const sizesFile = fromSyncAccessHandle(await openTracked(data.sizesName));
+      sizesFile.truncate(0);
+      sizesFile.write(0, new Uint8Array(result.sizes.buffer, result.sizes.byteOffset, result.sizes.byteLength));
       closeAll();
       post({ type: 'chapter-done', ...result }, [result.sizes.buffer]);
     } else {
@@ -48,6 +52,7 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
             release: async () => {
               handle.close();
               await directory.removeEntry(name);
+              await directory.removeEntry(`${name}.sizes`).catch(() => {});
             },
           };
         },

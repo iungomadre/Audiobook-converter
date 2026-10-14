@@ -3,6 +3,7 @@ import { AAC_FRAMES_PER_PACKET, type ChapterMarker } from '@/shared/lib/mp4';
 import { clearOutputs, createScreenWakeLock, interruptedFlag } from '@/shared/lib/storage';
 import { SAMPLE_RATE } from '../lib/convert-to-m4b';
 import { createEtaEstimator } from '../lib/eta';
+import { checkpoint, loadChapterSizes, partName, sizesName, type Checkpoint } from './checkpoint';
 import { LocalizedError, toErrorInfo, type ErrorInfo } from './errors';
 import type { ConversionJob, ConversionProgress, WorkerRequest, WorkerResponse } from './protocol';
 
@@ -82,11 +83,31 @@ export const createConversion = () => {
     const ensureCurrent = () => {
       if (id !== runId) throw new Cancelled();
     };
-    await clearOutputs();
-
     const preset = getPreset(book.presetId);
+    const files = book.chapters.map((chapter) => chapter.file);
+
+    // Continue an interrupted conversion of the same files, or start from scratch.
+    let saved: Checkpoint | null = checkpoint.load();
+    if (!saved || !checkpoint.matches(saved, files, preset.numberOfChannels, preset.bitrate)) {
+      await clearOutputs();
+      saved = checkpoint.create(`book-${Date.now()}.m4b`, files, preset.numberOfChannels, preset.bitrate);
+      checkpoint.save(saved);
+    }
+    const progressState: Checkpoint = saved;
+    type Encoded = { sizes: Uint32Array; audioSpecificConfig: Uint8Array; encoder: 'native' | 'wasm' };
+    const encoded: Encoded[] = new Array(files.length);
+    if (progressState.audioSpecificConfig) {
+      const audioSpecificConfig = Uint8Array.from(progressState.audioSpecificConfig);
+      for (const index of progressState.done) {
+        const sizes = await loadChapterSizes(progressState.outputName, index);
+        if (sizes) encoded[index] = { sizes, audioSpecificConfig, encoder: 'native' };
+      }
+    }
+    progressState.done = progressState.done.filter((index) => encoded[index]);
+    ensureCurrent();
+
     const job: ConversionJob = {
-      outputName: `book-${Date.now()}.m4b`,
+      outputName: progressState.outputName,
       chapters: book.chapters.map(({ file, title, durationSeconds }, index) => ({
         file,
         title: title.trim() || numberedTitle(index),
@@ -100,9 +121,12 @@ export const createConversion = () => {
     const settings = { outputName: job.outputName, numberOfChannels: job.numberOfChannels, bitrate: job.bitrate };
     const totalSeconds = totalDuration(book.chapters);
     const startedAt = Date.now();
-    const chapterSeconds = job.chapters.map(() => 0);
-    let chaptersDone = 0;
-    const eta = totalSeconds === null ? null : createEtaEstimator(totalSeconds, startedAt);
+    const encodedSeconds = (sizes: Uint32Array) => (sizes.length * AAC_FRAMES_PER_PACKET) / SAMPLE_RATE;
+    const chapterSeconds = job.chapters.map((_, index) => (encoded[index] ? encodedSeconds(encoded[index].sizes) : 0));
+    let chaptersDone = progressState.done.length;
+    // Estimate only from work done in this session; reused chapters took no time.
+    const reusedSeconds = chapterSeconds.reduce((sum, seconds) => sum + seconds, 0);
+    const eta = totalSeconds === null ? null : createEtaEstimator(Math.max(0, totalSeconds - reusedSeconds), startedAt);
     const report = () => {
       if (id !== runId) return;
       const processedSeconds = chapterSeconds.reduce((sum, seconds) => sum + seconds, 0);
@@ -112,7 +136,7 @@ export const createConversion = () => {
           chapterIndex: Math.min(chaptersDone, job.chapters.length - 1),
           processedSeconds,
           totalSeconds,
-          remainingSeconds: eta?.update(processedSeconds, Date.now()) ?? null,
+          remainingSeconds: eta?.update(processedSeconds - reusedSeconds, Date.now()) ?? null,
         },
         startedAt,
       });
@@ -120,17 +144,20 @@ export const createConversion = () => {
     report();
 
     try {
-      type Encoded = { sizes: Uint32Array; audioSpecificConfig: Uint8Array; encoder: 'native' | 'wasm' };
-      const encoded: Encoded[] = new Array(job.chapters.length);
-      const partName = (index: number) => `${job.outputName}.part${index}`;
-
       // A small pool of workers, each encoding one chapter at a time into its own part file.
+      const pending = job.chapters.map((_, index) => index).filter((index) => !encoded[index]);
       let next = 0;
       const runNext = async (): Promise<void> => {
-        while (next < job.chapters.length) {
-          const index = next++;
+        while (next < pending.length) {
+          const index = pending[next++];
           const result = await runInFreshWorker(
-            { type: 'encode-chapter', settings, file: job.chapters[index].file, partName: partName(index) },
+            {
+              type: 'encode-chapter',
+              settings,
+              file: job.chapters[index].file,
+              partName: partName(job.outputName, index),
+              sizesName: sizesName(job.outputName, index),
+            },
             (processedSeconds) => {
               chapterSeconds[index] = processedSeconds;
               report();
@@ -139,22 +166,25 @@ export const createConversion = () => {
           ensureCurrent();
           if (result.type !== 'chapter-done') throw new Error(`Unexpected worker reply: ${result.type}`);
           encoded[index] = result;
-          chapterSeconds[index] = (result.sizes.length * AAC_FRAMES_PER_PACKET) / SAMPLE_RATE;
+          chapterSeconds[index] = encodedSeconds(result.sizes);
           chaptersDone++;
+          progressState.done.push(index);
+          progressState.audioSpecificConfig ??= Array.from(result.audioSpecificConfig);
+          checkpoint.save(progressState);
           report();
         }
       };
-      await Promise.all(Array.from({ length: Math.min(parallelWorkers(), job.chapters.length) }, runNext));
+      await Promise.all(Array.from({ length: Math.min(parallelWorkers(), pending.length) }, runNext));
 
       // Chapters start where the audio of the previous ones ends.
       const markers: ChapterMarker[] = [];
       let startSeconds = 0;
       for (const [index, chapter] of job.chapters.entries()) {
         markers.push({ title: chapter.title, startSeconds });
-        startSeconds += (encoded[index].sizes.length * AAC_FRAMES_PER_PACKET) / SAMPLE_RATE;
+        startSeconds += encodedSeconds(encoded[index].sizes);
       }
 
-      const parts = encoded.map((result, index) => ({ name: partName(index), sizes: result.sizes }));
+      const parts = encoded.map((result, index) => ({ name: partName(job.outputName, index), sizes: result.sizes }));
       const finished = await runInFreshWorker(
         {
           type: 'assemble',
@@ -170,6 +200,7 @@ export const createConversion = () => {
       );
       ensureCurrent();
       if (finished.type !== 'finished') throw new Error(`Unexpected worker reply: ${finished.type}`);
+      checkpoint.clear();
       set({
         status: 'done',
         outputName: job.outputName,
@@ -189,13 +220,32 @@ export const createConversion = () => {
   const cancel = () => {
     runId++;
     stopWorkers();
+    checkpoint.clear();
     set({ status: 'idle' });
     // The terminated worker may still hold the file lock for a moment.
     setTimeout(() => void clearOutputs(), 1000);
   };
 
+  /** Chapters finished in an earlier session, if any. */
+  const savedProgress = (): { done: number; total: number } | null => {
+    const saved = checkpoint.load();
+    return saved && saved.done.length > 0 ? { done: saved.done.length, total: saved.files.length } : null;
+  };
+
+  /** Like `savedProgress`, but only if `book` has the same files and audio settings, so it would be continued. */
+  const resumableFor = (book: Book): { done: number; total: number } | null => {
+    const saved = checkpoint.load();
+    const preset = getPreset(book.presetId);
+    const files = book.chapters.map((chapter) => chapter.file);
+    return saved && saved.done.length > 0 && checkpoint.matches(saved, files, preset.numberOfChannels, preset.bitrate)
+      ? { done: saved.done.length, total: saved.files.length }
+      : null;
+  };
+
   return {
     get: () => state,
+    savedProgress,
+    resumableFor,
     subscribe: (listener: Listener) => {
       listeners.add(listener);
       listener(state);

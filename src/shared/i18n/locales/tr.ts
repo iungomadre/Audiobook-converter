@@ -64,6 +64,8 @@ export const tr: Messages = {
   'convert.interrupted': 'Önceki dönüştürme yarıda kaldı ve sayfa yeniden yüklendi. iPhone ve iPad’de bu, ekran kilitlendiğinde, başka bir uygulamaya geçtiğinizde veya Safari’nin belleği yetmediğinde olur. Safari’yi ekran açıkken açık tutup yeniden deneyin.',
   'convert.lowStorage': 'Cihazınızda bu kitap için yeterli tarayıcı depolama alanı olmayabilir. Biraz yer açıp yeniden deneyin.',
   'convert.tryAnyway': 'Yine de denensin mi?',
+  'convert.resumeAvailable': 'Sayfa yeniden yüklenmeden önce {total} bölümden {done} tanesi dönüştürüldü. Aynı dosyaları yeniden seçip “M4B oluştur”a basarak kaldığı yerden devam edin.',
+  'convert.resumeReady': '{total} bölümden {done} tanesi zaten dönüştürüldü — “M4B oluştur” kaldığı yerden devam eder.',
   'convert.defaultFileName': 'Sesli kitap',
 
   'error.noOpfs': 'Bu tarayıcı büyük dosyaları yerel olarak saklayamıyor (Origin Private File System yok).',

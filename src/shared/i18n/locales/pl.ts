@@ -69,6 +69,8 @@ export const pl: Messages = {
   'convert.interrupted': 'Poprzednia konwersja została przerwana, a strona przeładowana. Na iPhonie i iPadzie dzieje się tak, gdy ekran się zablokuje, przełączysz się do innej aplikacji albo Safari zabraknie pamięci. Nie zamykaj Safari, nie wygaszaj ekranu i spróbuj ponownie.',
   'convert.lowStorage': 'Na urządzeniu może brakować wolnego miejsca w pamięci przeglądarki na tę książkę. Zwolnij trochę miejsca i spróbuj ponownie.',
   'convert.tryAnyway': 'Spróbować mimo to?',
+  'convert.resumeAvailable': 'Przed przeładowaniem strony przekonwertowano {done} z {total} rozdziałów. Wybierz ponownie te same pliki i naciśnij „Utwórz M4B”, aby kontynuować od tego miejsca.',
+  'convert.resumeReady': '{done} z {total} rozdziałów jest już przekonwertowanych — „Utwórz M4B” kontynuuje od tego miejsca.',
   'convert.defaultFileName': 'Audiobook',
 
   'error.noOpfs': 'Ta przeglądarka nie potrafi przechowywać dużych plików lokalnie (brak Origin Private File System).',

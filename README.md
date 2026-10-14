@@ -44,9 +44,15 @@ server: decoding, AAC encoding and MP4 writing all run on your device.
    iTunes tags, cover and the audiobook flag (`src/shared/lib/mp4`).
 5. The file is saved via the File System Access save dialog, or a download.
 
-On phones the screen is kept awake during conversion (Screen Wake Lock), and
-if the page is reloaded mid-conversion — iOS does this silently when a tab is
-killed — the app says so instead of just showing an empty form.
+On phones the screen is kept awake during conversion (Screen Wake Lock).
+
+**Resuming.** Safari on iOS keeps memory from reading large files and kills
+the tab after a few gigabytes, silently reloading the page. Finished chapter
+parts therefore stay on the device together with their packet sizes, and a
+small checkpoint in `localStorage` records which chapters are done. After a
+reload the app says how far it got; choosing the same files again (same names,
+sizes and dates, same audio quality) and pressing "Create M4B" continues with
+the remaining chapters. The result is identical to an uninterrupted run.
 
 ## Browser support
 

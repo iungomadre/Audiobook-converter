@@ -64,6 +64,8 @@ export const zhCN: Messages = {
   'convert.interrupted': '上一次转换被中断，页面已重新加载。在 iPhone 和 iPad 上，锁屏、切换到其他应用或 Safari 内存不足时都会出现这种情况。请保持 Safari 打开并让屏幕常亮，然后重试。',
   'convert.lowStorage': '你的设备可能没有足够的浏览器存储空间来保存这本书。请释放一些空间后重试。',
   'convert.tryAnyway': '仍然尝试？',
+  'convert.resumeAvailable': '页面重新加载前已转换 {total} 个章节中的 {done} 个。请重新选择相同的文件并点击“生成 M4B”，从中断处继续。',
+  'convert.resumeReady': '{total} 个章节中已有 {done} 个转换完成——点击“生成 M4B”将从此处继续。',
   'convert.defaultFileName': '有声书',
 
   'error.noOpfs': '此浏览器无法在本地存储大文件（不支持 Origin Private File System）。',

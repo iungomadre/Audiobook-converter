@@ -64,6 +64,8 @@ export const de: Messages = {
   'convert.interrupted': 'Die letzte Konvertierung wurde unterbrochen und die Seite neu geladen. Auf iPhone und iPad passiert das, wenn sich der Bildschirm sperrt, du zu einer anderen App wechselst oder Safari der Speicher ausgeht. Lass Safari mit eingeschaltetem Bildschirm geöffnet und versuche es erneut.',
   'convert.lowStorage': 'Auf deinem Gerät ist im Browser vielleicht nicht genug Speicher für dieses Buch frei. Gib etwas Speicher frei und versuche es erneut.',
   'convert.tryAnyway': 'Trotzdem versuchen?',
+  'convert.resumeAvailable': '{done} von {total} Kapiteln wurden konvertiert, bevor die Seite neu geladen wurde. Wähle dieselben Dateien erneut und drücke „M4B erstellen“, um dort weiterzumachen.',
+  'convert.resumeReady': '{done} von {total} Kapiteln sind bereits konvertiert – „M4B erstellen“ macht dort weiter.',
   'convert.defaultFileName': 'Hörbuch',
 
   'error.noOpfs': 'Dieser Browser kann keine großen Dateien lokal speichern (kein Origin Private File System).',

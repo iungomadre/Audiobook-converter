@@ -64,6 +64,8 @@ export const nl: Messages = {
   'convert.interrupted': 'De vorige conversie is onderbroken en de pagina is opnieuw geladen. Op iPhone en iPad gebeurt dat als het scherm vergrendelt, je naar een andere app gaat of Safari te weinig geheugen heeft. Houd Safari open met het scherm aan en probeer het opnieuw.',
   'convert.lowStorage': 'Je apparaat heeft mogelijk niet genoeg vrije browseropslag voor dit boek. Maak wat ruimte vrij en probeer het opnieuw.',
   'convert.tryAnyway': 'Toch proberen?',
+  'convert.resumeAvailable': '{done} van {total} hoofdstukken waren al geconverteerd voordat de pagina opnieuw werd geladen. Kies dezelfde bestanden opnieuw en druk op ‘M4B maken’ om daar verder te gaan.',
+  'convert.resumeReady': '{done} van {total} hoofdstukken zijn al geconverteerd — ‘M4B maken’ gaat daar verder.',
   'convert.defaultFileName': 'Luisterboek',
 
   'error.noOpfs': 'Deze browser kan geen grote bestanden lokaal opslaan (geen Origin Private File System).',

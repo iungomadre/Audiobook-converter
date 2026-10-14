@@ -23,7 +23,7 @@ export type ConversionJob = ConversionSettings & {
  * worker assembles the parts into the M4B.
  */
 export type WorkerRequest =
-  | { type: 'encode-chapter'; settings: ConversionSettings; file: File; partName: string }
+  | { type: 'encode-chapter'; settings: ConversionSettings; file: File; partName: string; sizesName: string }
   | {
     type: 'assemble';
     settings: ConversionSettings;

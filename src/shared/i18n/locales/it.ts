@@ -64,6 +64,8 @@ export const it: Messages = {
   'convert.interrupted': 'La conversione precedente è stata interrotta e la pagina è stata ricaricata. Su iPhone e iPad succede quando lo schermo si blocca, passi a un’altra app o Safari esaurisce la memoria. Tieni Safari aperto con lo schermo acceso e riprova.',
   'convert.lowStorage': 'Il tuo dispositivo potrebbe non avere abbastanza spazio libero nel browser per questo libro. Libera un po’ di spazio e riprova.',
   'convert.tryAnyway': 'Provare comunque?',
+  'convert.resumeAvailable': 'Prima che la pagina venisse ricaricata sono stati convertiti {done} capitoli su {total}. Scegli di nuovo gli stessi file e premi «Crea M4B» per riprendere da lì.',
+  'convert.resumeReady': '{done} capitoli su {total} sono già convertiti: «Crea M4B» riprende da lì.',
   'convert.defaultFileName': 'Audiolibro',
 
   'error.noOpfs': 'Questo browser non può salvare file di grandi dimensioni in locale (manca Origin Private File System).',

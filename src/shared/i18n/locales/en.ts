@@ -65,6 +65,8 @@ export const en = {
   'convert.interrupted': 'Your previous conversion was interrupted and the page was reloaded. On iPhone and iPad this happens when the screen locks, you switch to another app, or Safari runs out of memory. Keep Safari open with the screen on and try again.',
   'convert.lowStorage': 'Your device may not have enough free browser storage for this book. Free up some space and try again.',
   'convert.tryAnyway': 'Try anyway?',
+  'convert.resumeAvailable': '{done} of {total} chapters were converted before the page reloaded. Choose the same files again and press “Create M4B” to continue from there.',
+  'convert.resumeReady': '{done} of {total} chapters are already converted — “Create M4B” continues from there.',
   'convert.defaultFileName': 'Audiobook',
 
   'error.noOpfs': 'This browser cannot store large files locally (no Origin Private File System).',
