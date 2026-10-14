@@ -117,12 +117,37 @@ Re-encoding is the expensive step; everything else is cheap byte work.
   target audiobook player, Apple Books and VLC; check with `ffprobe`/MP4Box.
 - Same book via ffmpeg.wasm for a speed/size/compat baseline.
 
-## Open questions
+## Decisions (2026-10-14)
 
-- Which audiobook player/device is the target? (Decides whether the
-  QuickTime chapter track is required in the MVP or `chpl` is enough.)
-- Typical book length / total MP3 size (sets the memory budget).
-- Chapter titles: derived from filenames, ID3 titles, or "Chapter N"?
+- **Engine: Mediabunny** (v1.61.4 at time of writing) + WebCodecs, with
+  `@mediabunny/aac-encoder` as fallback where the browser lacks AAC encoding.
+- **Target player: Apple Books** → the **QuickTime chapter track** is
+  required in the MVP (Apple ignores Nero `chpl`); we write `chpl` too.
+- **Book length: 40+ h is normal.** At 64 kbps mono that is ~1.1–1.2 GB of
+  output, so output must be streamed to disk (OPFS / File System Access),
+  never held in memory.
+- **Chapters: one per input file**, enumerated in natural filename order.
+- No custom codecs.
+
+## Licensing
+
+- `mediabunny` and `@mediabunny/aac-encoder`: **MPL-2.0**. Free for personal,
+  open-source and commercial use. Copyleft is per file: only changes made to
+  Mediabunny's own source files must be published under MPL-2.0; our code can
+  use any licence.
+- `@mediabunny/aac-encoder` bundles a WASM build of FFmpeg's libavcodec AAC
+  encoder (**LGPL-2.1+**). Fine to ship as-is with an attribution / licence
+  notice; it is only loaded in browsers without a native AAC encoder.
+
+## Gaps found in Mediabunny 1.61.4
+
+- No chapter API (the only "chapter" in the type definitions is Matroska's
+  EBML schema). We must add chapters ourselves: a QuickTime text track linked
+  via `tref/chap`, plus `moov/udta/chpl`. Options: post-process the MP4,
+  or contribute chapter support upstream.
+- `MetadataTags` covers title, artist, album, albumArtist, date, genre,
+  comment, description, images (cover) and `raw`. Audiobook-specific atoms
+  (`stik = 2`, narrator `©nrt`) need to go through `raw` or post-processing.
 
 ## Sources
 
