@@ -1,7 +1,7 @@
 import {
   audioTrak, chapterTextSample, chapterTrak, ftyp, MOVIE_TIMESCALE, mvhd, udta, type ChapterMarker, type M4bMetadata,
 } from './atoms';
-import { container, writeBox } from './box';
+import { container, writeBox, type Box } from './box';
 import { concat, fourCC, u32, u64 } from './bytes';
 import type { RandomAccessFile } from './random-access-file';
 
@@ -11,10 +11,22 @@ export type AudioFormat = {
   bitrate: number;
 };
 
+/**
+ * Which chapter formats to write. Apple's players read only the QuickTime
+ * chapter track; some others (foobar2000, VLC) read or prefer Nero `chpl`.
+ */
+export type ChapterFormats = {
+  quickTime: boolean;
+  nero: boolean;
+};
+
 export type FinishOptions = {
   chapters: readonly ChapterMarker[];
   metadata: M4bMetadata;
+  chapterFormats?: ChapterFormats;
 };
+
+const ALL_CHAPTER_FORMATS: ChapterFormats = { quickTime: true, nero: true };
 
 const SAMPLES_PER_CHUNK = 64; // ~1.5 s of AAC per chunk
 const WRITE_BUFFER_SIZE = 1 << 20; // Packets are tiny; batch them into 1 MB disk writes
@@ -95,7 +107,7 @@ export class M4bWriter {
     return this.totalFrames / this.format.sampleRate;
   }
 
-  finish({ chapters, metadata }: FinishOptions): number {
+  finish({ chapters, metadata, chapterFormats = ALL_CHAPTER_FORMATS }: FinishOptions): number {
     if (!this.audioSpecificConfig || this.sampleCount === 0) throw new Error('No audio was encoded');
     this.flush();
 
@@ -112,18 +124,29 @@ export class M4bWriter {
 
     const totalSeconds = this.durationSeconds;
     const markers = normalizeChapters(chapters, totalSeconds);
-    const textSamples = markers.map((chapter) => chapterTextSample(chapter.title));
-    const textData = concat(textSamples);
-    this.file.write(this.position, concat([u32(textData.length + 8), fourCC('mdat'), textData]));
-    const textChunkOffset = this.position + 8;
-    this.position += textData.length + 8;
-
     const durationMs = Math.round(totalSeconds * MOVIE_TIMESCALE);
+
+    let chapterTrack: Box | null = null;
+    if (chapterFormats.quickTime) {
+      const textSamples = markers.map((chapter) => chapterTextSample(chapter.title));
+      const textData = concat(textSamples);
+      this.file.write(this.position, concat([u32(textData.length + 8), fourCC('mdat'), textData]));
+      chapterTrack = chapterTrak({
+        trackId: CHAPTER_TRACK_ID,
+        durationMs,
+        chapters: markers,
+        totalSeconds,
+        sampleSizes: textSamples.map((sample) => sample.length),
+        chunkOffset: this.position + 8,
+      });
+      this.position += textData.length + 8;
+    }
+
     const moov = container('moov', [
-      mvhd(durationMs, CHAPTER_TRACK_ID + 1),
+      mvhd(durationMs, (chapterTrack ? CHAPTER_TRACK_ID : AUDIO_TRACK_ID) + 1),
       audioTrak({
         trackId: AUDIO_TRACK_ID,
-        chapterTrackId: CHAPTER_TRACK_ID,
+        chapterTrackId: chapterTrack ? CHAPTER_TRACK_ID : null,
         ...this.format,
         audioSpecificConfig: this.audioSpecificConfig,
         durationMs,
@@ -133,15 +156,8 @@ export class M4bWriter {
         chunkOffsets,
         samplesPerChunk: SAMPLES_PER_CHUNK,
       }),
-      chapterTrak({
-        trackId: CHAPTER_TRACK_ID,
-        durationMs,
-        chapters: markers,
-        totalSeconds,
-        sampleSizes: textSamples.map((sample) => sample.length),
-        chunkOffset: textChunkOffset,
-      }),
-      udta(metadata, markers),
+      ...(chapterTrack ? [chapterTrack] : []),
+      udta(metadata, chapterFormats.nero ? markers : null),
     ]);
 
     this.position = writeBox(this.file, this.position, moov);

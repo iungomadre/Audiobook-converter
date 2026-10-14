@@ -1,6 +1,7 @@
 import type { BookStore } from '@/entities/book';
 import { createConvertPanel } from '@/features/convert-book';
 import { createMetadataForm } from '@/features/edit-book-metadata';
+import { createChapterFormatPicker } from '@/features/select-chapter-format';
 import { h } from '@/shared/ui';
 import { createAppHeader } from '@/widgets/app-header';
 import { createBookSetup } from '@/widgets/book-setup';
@@ -13,5 +14,6 @@ export const createConverterPage = (store: BookStore): HTMLElement =>
     createAppHeader(),
     section(1, 'Audio files', createBookSetup(store)),
     section(2, 'Book details', createMetadataForm(store)),
-    section(3, 'Convert', createConvertPanel(store)),
+    section(3, 'Player compatibility', createChapterFormatPicker(store)),
+    section(4, 'Convert', createConvertPanel(store)),
   );

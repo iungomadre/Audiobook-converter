@@ -1,4 +1,5 @@
 import type { BookMetadata } from '@/entities/book';
+import type { ChapterFormats } from '@/shared/lib/mp4';
 
 export type ConversionJob = {
   /** File name inside the OPFS output directory. */
@@ -8,6 +9,7 @@ export type ConversionJob = {
   cover: { data: Uint8Array; mimeType: string } | null;
   numberOfChannels: number;
   bitrate: number;
+  chapterFormats: ChapterFormats;
 };
 
 export type WorkerRequest = { type: 'convert'; job: ConversionJob };

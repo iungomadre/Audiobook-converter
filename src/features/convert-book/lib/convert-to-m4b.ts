@@ -122,7 +122,7 @@ export const convertToM4b = async (
   }
 
   onProgress({ chapterIndex: job.chapters.length - 1, processedSeconds: position(), totalSeconds: knownTotal });
-  writer.finish({ chapters: markers, metadata: buildMetadata(job) });
+  writer.finish({ chapters: markers, metadata: buildMetadata(job), chapterFormats: job.chapterFormats });
   return { durationSeconds: writer.durationSeconds, encoder };
 };
 

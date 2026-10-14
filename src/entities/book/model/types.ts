@@ -1,3 +1,5 @@
+import type { ChapterFormatId } from './chapter-formats';
+
 export type Chapter = {
   id: string;
   file: File;
@@ -36,4 +38,5 @@ export type Book = {
   metadata: BookMetadata;
   cover: Cover | null;
   presetId: string;
+  chapterFormat: ChapterFormatId;
 };

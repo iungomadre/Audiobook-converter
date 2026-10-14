@@ -1,4 +1,4 @@
-import { getPreset, totalDuration, type Book } from '@/entities/book';
+import { getChapterFormat, getPreset, totalDuration, type Book } from '@/entities/book';
 import { clearOutputs, createScreenWakeLock, interruptedFlag } from '@/shared/lib/storage';
 import type { ConversionJob, ConversionProgress, WorkerRequest, WorkerResponse } from './protocol';
 
@@ -39,6 +39,7 @@ export const createConversion = () => {
     await clearOutputs();
 
     const preset = getPreset(book.presetId);
+    const chapterFormat = getChapterFormat(book.chapterFormat);
     const job: ConversionJob = {
       outputName,
       chapters: book.chapters.map(({ file, title, durationSeconds }, index) => ({
@@ -50,6 +51,7 @@ export const createConversion = () => {
       cover: book.cover && { data: book.cover.data, mimeType: book.cover.mimeType },
       numberOfChannels: preset.numberOfChannels,
       bitrate: preset.bitrate,
+      chapterFormats: { quickTime: chapterFormat.quickTime, nero: chapterFormat.nero },
     };
 
     const startedAt = Date.now();

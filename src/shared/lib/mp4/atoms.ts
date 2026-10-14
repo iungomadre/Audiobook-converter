@@ -68,7 +68,8 @@ const esds = (audioSpecificConfig: Uint8Array, bitrate: number): Box =>
 
 export type AudioTrackInput = {
   trackId: number;
-  chapterTrackId: number;
+  /** Track holding QuickTime chapters, or null when they are not written. */
+  chapterTrackId: number | null;
   sampleRate: number;
   numberOfChannels: number;
   bitrate: number;
@@ -114,7 +115,7 @@ export const audioTrak = (input: AudioTrackInput): Box => {
 
   return container('trak', [
     tkhd(input.trackId, input.durationMs, 3, 0x100),
-    container('tref', [leaf('chap', [u32(input.chapterTrackId)])]),
+    ...(input.chapterTrackId === null ? [] : [container('tref', [leaf('chap', [u32(input.chapterTrackId)])])]),
     container('mdia', [
       mdhd(input.sampleRate, input.totalFrames),
       hdlr('soun', 'SoundHandler'),
@@ -191,11 +192,14 @@ export const chapterTrak = (input: {
   ]);
 };
 
+/** Nero chapters can list at most 255 entries (8-bit count). */
+export const NERO_MAX_CHAPTERS = 255;
+
 /** Nero chapter list (read by most non-Apple players). Times are in units of 100 ns. */
 export const chpl = (chapters: readonly ChapterMarker[]): Box =>
   leaf('chpl', [
-    u8(1), zeros(3), u32(0), u8(Math.min(chapters.length, 255)),
-    ...chapters.slice(0, 255).flatMap((chapter) => {
+    u8(1), zeros(3), u32(0), u8(Math.min(chapters.length, NERO_MAX_CHAPTERS)),
+    ...chapters.slice(0, NERO_MAX_CHAPTERS).flatMap((chapter) => {
       const title = truncateUtf8(chapter.title, 255);
       return [u64(BigInt(Math.round(chapter.startSeconds * 1e7))), u8(title.length), title];
     }),
@@ -217,7 +221,8 @@ const item = (key: string, type: number, value: Uint8Array): Box =>
 
 const textItem = (key: string, value: string | undefined): Box[] => (value ? [item(key, 1, utf8(value))] : []);
 
-export const udta = (metadata: M4bMetadata, chapters: readonly ChapterMarker[]): Box => {
+/** `neroChapters` null leaves out the Nero chapter list. */
+export const udta = (metadata: M4bMetadata, neroChapters: readonly ChapterMarker[] | null): Box => {
   const { cover } = metadata;
   const ilst = container('ilst', [
     ...textItem('©nam', metadata.title),
@@ -238,6 +243,6 @@ export const udta = (metadata: M4bMetadata, chapters: readonly ChapterMarker[]):
 
   return container('udta', [
     container('meta', [leaf('hdlr', [u32(0), u32(0), fourCC('mdir'), fourCC('appl'), zeros(9)]), ilst], u32(0)),
-    chpl(chapters),
+    ...(neroChapters ? [chpl(neroChapters)] : []),
   ]);
 };

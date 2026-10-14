@@ -1,3 +1,4 @@
+import type { ChapterFormatId } from './chapter-formats';
 import type { Book, BookMetadata, Chapter, Cover } from './types';
 import { AUDIO_PRESETS } from './presets';
 
@@ -7,7 +8,13 @@ const EMPTY_METADATA: BookMetadata = { title: '', author: '', narrator: '', year
 
 /** Single source of truth for the book being assembled. */
 export const createBookStore = () => {
-  let book: Book = { chapters: [], metadata: { ...EMPTY_METADATA }, cover: null, presetId: AUDIO_PRESETS[0].id };
+  let book: Book = {
+    chapters: [],
+    metadata: { ...EMPTY_METADATA },
+    cover: null,
+    presetId: AUDIO_PRESETS[0].id,
+    chapterFormat: 'both',
+  };
   const listeners = new Set<Listener>();
 
   const set = (next: Partial<Book>) => {
@@ -31,6 +38,7 @@ export const createBookStore = () => {
       set({ cover });
     },
     setPreset: (presetId: string) => set({ presetId }),
+    setChapterFormat: (chapterFormat: ChapterFormatId) => set({ chapterFormat }),
   };
 };
 

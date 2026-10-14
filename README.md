@@ -11,8 +11,11 @@ server: decoding, AAC encoding and MP4 writing all run on your device.
 - Chapter titles default to "Chapter N"; rename, reorder or remove them.
 - Title, author, narrator, year, genre, description and cover image.
   Fields and cover are pre-filled from the first file's ID3 tags when present.
-- Output plays in Apple Books: AAC audio, QuickTime chapter track, Nero `chpl`
-  chapters (other players), iTunes metadata and `stik = Audiobook`.
+- Output plays in Apple Books: AAC audio, iTunes metadata and
+  `stik = Audiobook`.
+- Chapter format switch with example apps: **both** (default), **Apple**
+  (QuickTime chapter track: Apple Books, Apple Music, BookPlayer, Symfonium)
+  or **Nero** (`chpl` list: foobar2000, VLC, Mp3tag; max 255 chapters).
 - Long books (40 h+) are fine: audio is streamed through a Web Worker and the
   output is written to disk (Origin Private File System), not kept in memory.
 
@@ -69,9 +72,10 @@ src/
     select-audio-files/   folder/file picking, drag & drop, tag pre-fill
     edit-chapters/        chapter titles, order, removal
     edit-book-metadata/   metadata form, cover, audio quality
+    select-chapter-format/ Apple / Nero / both chapter formats, with example apps
     convert-book/         worker, conversion pipeline, progress, saving
   entities/
-    book/                 book model, store, audio presets
+    book/                 book model, store, audio presets, chapter formats
   shared/
     lib/mp4/              streaming M4B writer (chapters, tags, cover)
     lib/audio/            channel remixing and streaming resampler

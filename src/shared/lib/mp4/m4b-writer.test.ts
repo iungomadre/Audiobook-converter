@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { findPath, parseBoxes } from './box';
 import { readFourCC } from './bytes';
-import { M4bWriter, MemoryFile } from './index';
+import { M4bWriter, MemoryFile, type ChapterFormats } from './index';
 
 const FIXTURE = readFileSync(new URL('./__fixtures__/tone-6s.aac', import.meta.url));
 const FORMAT = { sampleRate: 44_100, numberOfChannels: 1, bitrate: 32_000 };
@@ -36,11 +36,11 @@ const adtsFrames = (): Uint8Array[] => {
 const AUDIO_SPECIFIC_CONFIG = Uint8Array.of(0x12, 0x08);
 
 /** Raw AAC packets + AudioSpecificConfig, as WebCodecs' AudioEncoder delivers them. */
-const writeFromRawPackets = (): MemoryFile => {
+const writeFromRawPackets = (chapterFormats?: ChapterFormats): MemoryFile => {
   const file = new MemoryFile();
   const writer = new M4bWriter(file, FORMAT);
   for (const frame of adtsFrames()) writer.addPacket(frame.subarray(7), 1024, AUDIO_SPECIFIC_CONFIG);
-  writer.finish({ chapters: CHAPTERS, metadata: METADATA });
+  writer.finish({ chapters: CHAPTERS, metadata: METADATA, chapterFormats });
   return file;
 };
 
@@ -78,8 +78,23 @@ describe('M4bWriter', () => {
     expect(ilst.children!.map((box) => box.type)).toEqual(expect.arrayContaining(['©nam', '©ART', '©nrt', 'stik', 'covr']));
   });
 
+  it.each([
+    [{ quickTime: true, nero: false }, ['ftyp', 'mdat', 'mdat', 'moov'], 2, false],
+    [{ quickTime: false, nero: true }, ['ftyp', 'mdat', 'moov'], 1, true],
+  ])('writes only the requested chapter formats (%o)', (formats, topLevel, trackCount, hasChpl) => {
+    const boxes = parseBoxes(writeFromRawPackets(formats).bytes);
+    expect(boxes.map((box) => box.type)).toEqual(topLevel);
+    const moov = boxes.at(-1)!;
+    const traks = moov.children!.filter((box) => box.type === 'trak');
+    expect(traks).toHaveLength(trackCount);
+    expect(findPath(traks[0], ['tref']) !== undefined).toBe(formats.quickTime);
+    expect(findPath(moov, ['udta', 'chpl']) !== undefined).toBe(hasChpl);
+  });
+
   it.skipIf(!hasFfprobe()).each([
-    ['raw packets with a description', writeFromRawPackets],
+    ['raw packets with a description', () => writeFromRawPackets()],
+    ['QuickTime chapters only', () => writeFromRawPackets({ quickTime: true, nero: false })],
+    ['Nero chapters only', () => writeFromRawPackets({ quickTime: false, nero: true })],
     ['ADTS frames', writeFromAdtsFrames],
   ])('produces a file ffmpeg plays and reads chapters from (%s)', (_, write) => {
     const result = probe(write().bytes);
