@@ -4,6 +4,8 @@ import type { Message } from '../types';
 export const en = {
   'app.title': 'Audiobook Converter',
   'app.tagline': 'Turn a folder of MP3 files into a single M4B audiobook with chapters and a cover — privately, in your browser.',
+  'app.startOver': 'Start over',
+  'app.startOverConfirm': 'Start over with a new book? The selected files, book details, cover and any unfinished conversion will be removed.',
   'app.language': 'Language',
 
   'section.files': 'Audio files',
@@ -65,7 +67,7 @@ export const en = {
   'convert.interrupted': 'Your previous conversion was interrupted and the page was reloaded. On iPhone and iPad this happens when the screen locks, you switch to another app, or Safari runs out of memory. Keep Safari open with the screen on and try again.',
   'convert.lowStorage': 'Your device may not have enough free browser storage for this book. Free up some space and try again.',
   'convert.tryAnyway': 'Try anyway?',
-  'convert.resumeAvailable': '{done} of {total} chapters were converted before the page reloaded. Choose the same files again and press “Create M4B” to continue from there.',
+  'convert.resumeAvailable': 'The conversion stopped after {done} of {total} chapters because the page was reloaded — iPhone and iPad do this when a page uses a lot of memory or the screen locks. Choose the same files again and it continues automatically. Your book details, cover and chapter titles are kept.',
   'convert.resumeReady': '{done} of {total} chapters are already converted — “Create M4B” continues from there.',
   'convert.defaultFileName': 'Audiobook',
 

@@ -3,6 +3,8 @@ import type { Messages } from './en';
 export const fr: Messages = {
   'app.title': 'Convertisseur de livres audio',
   'app.tagline': 'Transformez un dossier de fichiers MP3 en un seul livre audio M4B avec chapitres et couverture — en privé, dans votre navigateur.',
+  'app.startOver': 'Recommencer',
+  'app.startOverConfirm': 'Recommencer avec un autre livre ? Les fichiers choisis, les informations du livre, la couverture et toute conversion inachevée seront supprimés.',
   'app.language': 'Langue',
 
   'section.files': 'Fichiers audio',
@@ -64,7 +66,7 @@ export const fr: Messages = {
   'convert.interrupted': 'La conversion précédente a été interrompue et la page rechargée. Sur iPhone et iPad, cela arrive quand l’écran se verrouille, que vous passez à une autre app ou que Safari manque de mémoire. Gardez Safari ouvert avec l’écran allumé et réessayez.',
   'convert.lowStorage': 'Votre appareil n’a peut-être pas assez d’espace libre dans le navigateur pour ce livre. Libérez de l’espace et réessayez.',
   'convert.tryAnyway': 'Essayer quand même ?',
-  'convert.resumeAvailable': '{done} chapitres sur {total} ont été convertis avant le rechargement de la page. Choisissez à nouveau les mêmes fichiers et appuyez sur « Créer le M4B » pour reprendre à cet endroit.',
+  'convert.resumeAvailable': 'La conversion s’est arrêtée après {done} chapitres sur {total} parce que la page a été rechargée — l’iPhone et l’iPad le font quand une page utilise beaucoup de mémoire ou que l’écran se verrouille. Choisissez à nouveau les mêmes fichiers et elle reprendra automatiquement. Les informations du livre, la couverture et les titres des chapitres sont conservés.',
   'convert.resumeReady': '{done} chapitres sur {total} sont déjà convertis — « Créer le M4B » reprend à partir de là.',
   'convert.defaultFileName': 'Livre audio',
 

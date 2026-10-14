@@ -3,6 +3,8 @@ import type { Messages } from './en';
 export const id: Messages = {
   'app.title': 'Pengonversi Buku Audio',
   'app.tagline': 'Ubah folder berisi file MP3 menjadi satu buku audio M4B lengkap dengan bab dan sampul — secara pribadi, di browser Anda.',
+  'app.startOver': 'Mulai dari awal',
+  'app.startOverConfirm': 'Mulai dari awal dengan buku lain? File yang dipilih, detail buku, sampul, dan konversi yang belum selesai akan dihapus.',
   'app.language': 'Bahasa',
 
   'section.files': 'File audio',
@@ -64,7 +66,7 @@ export const id: Messages = {
   'convert.interrupted': 'Konversi sebelumnya terputus dan halaman dimuat ulang. Di iPhone dan iPad hal ini terjadi saat layar terkunci, Anda beralih ke aplikasi lain, atau Safari kehabisan memori. Biarkan Safari terbuka dengan layar menyala, lalu coba lagi.',
   'convert.lowStorage': 'Perangkat Anda mungkin tidak memiliki cukup ruang penyimpanan browser untuk buku ini. Kosongkan sedikit ruang, lalu coba lagi.',
   'convert.tryAnyway': 'Tetap coba?',
-  'convert.resumeAvailable': '{done} dari {total} bab sudah dikonversi sebelum halaman dimuat ulang. Pilih file yang sama lagi lalu tekan “Buat M4B” untuk melanjutkan dari sana.',
+  'convert.resumeAvailable': 'Konversi berhenti setelah {done} dari {total} bab karena halaman dimuat ulang — iPhone dan iPad melakukannya saat halaman memakai banyak memori atau layar terkunci. Pilih file yang sama lagi dan konversi akan berlanjut otomatis. Detail buku, sampul, dan judul bab tetap tersimpan.',
   'convert.resumeReady': '{done} dari {total} bab sudah dikonversi — “Buat M4B” melanjutkan dari sana.',
   'convert.defaultFileName': 'Buku audio',
 

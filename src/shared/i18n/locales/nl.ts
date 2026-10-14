@@ -3,6 +3,8 @@ import type { Messages } from './en';
 export const nl: Messages = {
   'app.title': 'Luisterboek-converter',
   'app.tagline': 'Maak van een map met MP3-bestanden één M4B-luisterboek met hoofdstukken en een omslag — privé, in je browser.',
+  'app.startOver': 'Opnieuw beginnen',
+  'app.startOverConfirm': 'Opnieuw beginnen met een ander boek? De gekozen bestanden, boekgegevens, omslag en een onvoltooide conversie worden verwijderd.',
   'app.language': 'Taal',
 
   'section.files': 'Audiobestanden',
@@ -64,7 +66,7 @@ export const nl: Messages = {
   'convert.interrupted': 'De vorige conversie is onderbroken en de pagina is opnieuw geladen. Op iPhone en iPad gebeurt dat als het scherm vergrendelt, je naar een andere app gaat of Safari te weinig geheugen heeft. Houd Safari open met het scherm aan en probeer het opnieuw.',
   'convert.lowStorage': 'Je apparaat heeft mogelijk niet genoeg vrije browseropslag voor dit boek. Maak wat ruimte vrij en probeer het opnieuw.',
   'convert.tryAnyway': 'Toch proberen?',
-  'convert.resumeAvailable': '{done} van {total} hoofdstukken waren al geconverteerd voordat de pagina opnieuw werd geladen. Kies dezelfde bestanden opnieuw en druk op ‘M4B maken’ om daar verder te gaan.',
+  'convert.resumeAvailable': 'De conversie stopte na {done} van {total} hoofdstukken omdat de pagina opnieuw werd geladen — iPhone en iPad doen dat als een pagina veel geheugen gebruikt of het scherm vergrendelt. Kies dezelfde bestanden opnieuw en hij gaat automatisch verder. Boekgegevens, omslag en hoofdstuktitels blijven bewaard.',
   'convert.resumeReady': '{done} van {total} hoofdstukken zijn al geconverteerd — ‘M4B maken’ gaat daar verder.',
   'convert.defaultFileName': 'Luisterboek',
 

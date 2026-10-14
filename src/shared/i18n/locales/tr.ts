@@ -3,6 +3,8 @@ import type { Messages } from './en';
 export const tr: Messages = {
   'app.title': 'Sesli Kitap Dönüştürücü',
   'app.tagline': 'Bir MP3 klasörünü bölümleri ve kapağıyla tek bir M4B sesli kitaba dönüştürün — gizli kalarak, tarayıcınızda.',
+  'app.startOver': 'Baştan başla',
+  'app.startOverConfirm': 'Yeni bir kitapla baştan başlansın mı? Seçilen dosyalar, kitap bilgileri, kapak ve tamamlanmamış dönüştürme silinecek.',
   'app.language': 'Dil',
 
   'section.files': 'Ses dosyaları',
@@ -64,7 +66,7 @@ export const tr: Messages = {
   'convert.interrupted': 'Önceki dönüştürme yarıda kaldı ve sayfa yeniden yüklendi. iPhone ve iPad’de bu, ekran kilitlendiğinde, başka bir uygulamaya geçtiğinizde veya Safari’nin belleği yetmediğinde olur. Safari’yi ekran açıkken açık tutup yeniden deneyin.',
   'convert.lowStorage': 'Cihazınızda bu kitap için yeterli tarayıcı depolama alanı olmayabilir. Biraz yer açıp yeniden deneyin.',
   'convert.tryAnyway': 'Yine de denensin mi?',
-  'convert.resumeAvailable': 'Sayfa yeniden yüklenmeden önce {total} bölümden {done} tanesi dönüştürüldü. Aynı dosyaları yeniden seçip “M4B oluştur”a basarak kaldığı yerden devam edin.',
+  'convert.resumeAvailable': 'Sayfa yeniden yüklendiği için dönüştürme {total} bölümden {done} tanesinden sonra durdu — iPhone ve iPad, bir sayfa çok bellek kullandığında veya ekran kilitlendiğinde bunu yapar. Aynı dosyaları yeniden seçin, dönüştürme otomatik olarak devam eder. Kitap bilgileri, kapak ve bölüm başlıkları korunur.',
   'convert.resumeReady': '{total} bölümden {done} tanesi zaten dönüştürüldü — “M4B oluştur” kaldığı yerden devam eder.',
   'convert.defaultFileName': 'Sesli kitap',
 

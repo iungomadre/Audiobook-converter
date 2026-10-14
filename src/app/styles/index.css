@@ -43,9 +43,12 @@ body { margin: 0; background: var(--bg); }
 
 .app-header h1 { margin: 8px 0 4px; font-size: 1.9rem; }
 .app-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.header-actions { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.banner { display: grid; gap: 8px; }
+.banner:not(:has(p:not([hidden]))) { display: none; }
+.banner p { margin: 0; }
 .language-picker {
   width: auto;
-  margin-top: 10px;
   padding: 6px 10px;
   font-size: 0.95rem;
 }

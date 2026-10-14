@@ -3,6 +3,8 @@ import type { Messages } from './en';
 export const it: Messages = {
   'app.title': 'Convertitore di audiolibri',
   'app.tagline': 'Trasforma una cartella di file MP3 in un unico audiolibro M4B con capitoli e copertina, in privato, nel tuo browser.',
+  'app.startOver': 'Ricomincia',
+  'app.startOverConfirm': 'Ricominciare con un altro libro? I file scelti, i dettagli del libro, la copertina e qualsiasi conversione non terminata verranno rimossi.',
   'app.language': 'Lingua',
 
   'section.files': 'File audio',
@@ -64,7 +66,7 @@ export const it: Messages = {
   'convert.interrupted': 'La conversione precedente è stata interrotta e la pagina è stata ricaricata. Su iPhone e iPad succede quando lo schermo si blocca, passi a un’altra app o Safari esaurisce la memoria. Tieni Safari aperto con lo schermo acceso e riprova.',
   'convert.lowStorage': 'Il tuo dispositivo potrebbe non avere abbastanza spazio libero nel browser per questo libro. Libera un po’ di spazio e riprova.',
   'convert.tryAnyway': 'Provare comunque?',
-  'convert.resumeAvailable': 'Prima che la pagina venisse ricaricata sono stati convertiti {done} capitoli su {total}. Scegli di nuovo gli stessi file e premi «Crea M4B» per riprendere da lì.',
+  'convert.resumeAvailable': 'La conversione si è fermata dopo {done} capitoli su {total} perché la pagina è stata ricaricata: iPhone e iPad lo fanno quando una pagina usa molta memoria o lo schermo si blocca. Scegli di nuovo gli stessi file e riprenderà automaticamente. Dettagli del libro, copertina e titoli dei capitoli sono conservati.',
   'convert.resumeReady': '{done} capitoli su {total} sono già convertiti: «Crea M4B» riprende da lì.',
   'convert.defaultFileName': 'Audiolibro',
 

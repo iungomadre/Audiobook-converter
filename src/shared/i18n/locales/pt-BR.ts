@@ -3,6 +3,8 @@ import type { Messages } from './en';
 export const ptBR: Messages = {
   'app.title': 'Conversor de audiolivros',
   'app.tagline': 'Transforme uma pasta de arquivos MP3 em um único audiolivro M4B com capítulos e capa — com privacidade, no seu navegador.',
+  'app.startOver': 'Recomeçar',
+  'app.startOverConfirm': 'Recomeçar com outro livro? Os arquivos escolhidos, os detalhes do livro, a capa e qualquer conversão não concluída serão removidos.',
   'app.language': 'Idioma',
 
   'section.files': 'Arquivos de áudio',
@@ -64,7 +66,7 @@ export const ptBR: Messages = {
   'convert.interrupted': 'A conversão anterior foi interrompida e a página foi recarregada. No iPhone e no iPad isso acontece quando a tela bloqueia, você muda para outro app ou o Safari fica sem memória. Mantenha o Safari aberto com a tela ligada e tente de novo.',
   'convert.lowStorage': 'Seu dispositivo pode não ter espaço livre suficiente no navegador para este livro. Libere espaço e tente de novo.',
   'convert.tryAnyway': 'Tentar mesmo assim?',
-  'convert.resumeAvailable': '{done} de {total} capítulos foram convertidos antes de a página recarregar. Escolha os mesmos arquivos de novo e toque em “Criar M4B” para continuar de onde parou.',
+  'convert.resumeAvailable': 'A conversão parou após {done} de {total} capítulos porque a página foi recarregada — o iPhone e o iPad fazem isso quando uma página usa muita memória ou a tela bloqueia. Escolha os mesmos arquivos de novo e ela continuará automaticamente. Os detalhes do livro, a capa e os títulos dos capítulos foram mantidos.',
   'convert.resumeReady': '{done} de {total} capítulos já estão convertidos — “Criar M4B” continua de onde parou.',
   'convert.defaultFileName': 'Audiolivro',
 

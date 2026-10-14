@@ -3,6 +3,8 @@ import type { Messages } from './en';
 export const ja: Messages = {
   'app.title': 'オーディオブック変換ツール',
   'app.tagline': 'MP3 ファイルのフォルダーを、チャプターとカバー付きの 1 つの M4B オーディオブックに変換します。すべてブラウザー内で、プライベートに処理されます。',
+  'app.startOver': '最初からやり直す',
+  'app.startOverConfirm': '別の本で最初からやり直しますか？選択したファイル、本の情報、カバー、未完了の変換は削除されます。',
   'app.language': '言語',
 
   'section.files': 'オーディオファイル',
@@ -64,7 +66,7 @@ export const ja: Messages = {
   'convert.interrupted': '前回の変換は中断され、ページが再読み込みされました。iPhone や iPad では、画面がロックされたとき、別のアプリに切り替えたとき、または Safari のメモリが不足したときに起こります。画面をオンにしたまま Safari を開いておき、もう一度お試しください。',
   'convert.lowStorage': 'この本を保存するためのブラウザーの空き容量が不足している可能性があります。空き容量を増やしてから、もう一度お試しください。',
   'convert.tryAnyway': 'それでも試しますか？',
-  'convert.resumeAvailable': 'ページが再読み込みされる前に、{total} チャプター中 {done} チャプターの変換が完了していました。同じファイルをもう一度選び、「M4B を作成」を押すと続きから再開します。',
+  'convert.resumeAvailable': 'ページが再読み込みされたため、{total} チャプター中 {done} チャプターで変換が止まりました。iPhone や iPad は、ページが大量のメモリを使ったときや画面がロックされたときにこうなります。同じファイルをもう一度選ぶと自動的に続きから再開します。本の情報、カバー、チャプタータイトルは保持されています。',
   'convert.resumeReady': '{total} チャプター中 {done} チャプターは変換済みです。「M4B を作成」で続きから再開します。',
   'convert.defaultFileName': 'オーディオブック',
 

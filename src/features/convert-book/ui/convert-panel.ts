@@ -23,6 +23,10 @@ export type ConvertPanel = {
   panel: HTMLElement;
   /** Slim progress bar for the top of the screen, shown while converting and the panel is out of view. */
   statusBar: HTMLElement;
+  /** Notices about an interrupted conversion, meant for the top of the page (where a reloaded page opens). */
+  banner: HTMLElement;
+  /** Cancels any conversion and deletes its unfinished work. */
+  discard: () => void;
 };
 
 export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPanelOptions = {}): ConvertPanel => {
@@ -31,8 +35,12 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
   const unsupported = getUnsupportedReason();
   let saveError: string | null = null;
 
-  const interruptedNotice = h('p', { class: 'notice', hidden: !wasInterrupted, attrs: { role: 'alert' } }, tr('convert.interrupted'));
-  const resumeNotice = h('p', { class: 'notice' });
+  const interruptedNotice = h('p', { class: 'notice', hidden: true, attrs: { role: 'alert' } }, tr('convert.interrupted'));
+  const resumeNotice = h('p', { class: 'notice', attrs: { role: 'alert' } });
+  const banner = h('div', { class: 'banner' }, interruptedNotice, resumeNotice);
+  // After a reload that interrupted a conversion, picking the same files again continues it right away.
+  let autoContinue = conversion.savedProgress() !== null && !unsupported;
+  let showInterrupted = wasInterrupted && !autoContinue;
   const estimate = h('p', { class: 'muted' });
   const message = h('p', { attrs: { role: 'status' } });
   const progressBar = h('progress', { max: 1, value: 0 });
@@ -55,8 +63,8 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
     if (total !== null && await isStorageLow((getPreset(book.presetId).bitrate / 8) * total)) {
       if (!confirm(`${t('convert.lowStorage')}\n\n${t('convert.tryAnyway')}`)) return;
     }
-    interruptedNotice.hidden = true;
-    resumeNotice.hidden = true;
+    showInterrupted = false;
+    autoContinue = false;
     saveError = null;
     await conversion.start(book);
   });
@@ -94,6 +102,7 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
     const saved = idle && !resumable ? conversion.savedProgress() : null;
     resumeNotice.hidden = !saved;
     if (saved) resumeNotice.textContent = t('convert.resumeAvailable', saved);
+    interruptedNotice.hidden = !showInterrupted || state.status !== 'idle';
 
     estimate.hidden = running || state.status === 'done' || chapters.length === 0;
     estimate.textContent = [
@@ -136,12 +145,18 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
     onBusyChange?.(busy);
   });
   // Keep the estimate and button state in sync with the book and the language.
-  store.subscribe(() => render(conversion.get()));
+  store.subscribe((book) => {
+    render(conversion.get());
+    // Continue automatically once the same files are picked again and their lengths are known.
+    if (autoContinue && conversion.get().status === 'idle' && totalDuration(book.chapters) !== null && conversion.resumableFor(book)) {
+      autoContinue = false;
+      showInterrupted = false;
+      void conversion.start(book);
+    }
+  });
   onLanguageChange(() => render(conversion.get()));
 
   const panel = h('div', { class: 'convert' },
-    interruptedNotice,
-    resumeNotice,
     estimate,
     h('div', { class: 'row' }, convertButton, saveButton, cancelButton, againButton),
     progress,
@@ -156,5 +171,12 @@ export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPa
   }).observe(progress);
   statusBar.addEventListener('click', () => panel.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 
-  return { panel, statusBar };
+  const discard = () => {
+    autoContinue = false;
+    showInterrupted = false;
+    saveError = null;
+    conversion.cancel();
+  };
+
+  return { panel, statusBar, banner, discard };
 };

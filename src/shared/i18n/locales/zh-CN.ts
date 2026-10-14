@@ -3,6 +3,8 @@ import type { Messages } from './en';
 export const zhCN: Messages = {
   'app.title': '有声书转换器',
   'app.tagline': '把一个 MP3 文件夹转换成一本带章节和封面的 M4B 有声书——完全在浏览器中私密完成。',
+  'app.startOver': '重新开始',
+  'app.startOverConfirm': '要用另一本书重新开始吗？已选择的文件、图书信息、封面以及未完成的转换都将被删除。',
   'app.language': '语言',
 
   'section.files': '音频文件',
@@ -64,7 +66,7 @@ export const zhCN: Messages = {
   'convert.interrupted': '上一次转换被中断，页面已重新加载。在 iPhone 和 iPad 上，锁屏、切换到其他应用或 Safari 内存不足时都会出现这种情况。请保持 Safari 打开并让屏幕常亮，然后重试。',
   'convert.lowStorage': '你的设备可能没有足够的浏览器存储空间来保存这本书。请释放一些空间后重试。',
   'convert.tryAnyway': '仍然尝试？',
-  'convert.resumeAvailable': '页面重新加载前已转换 {total} 个章节中的 {done} 个。请重新选择相同的文件并点击“生成 M4B”，从中断处继续。',
+  'convert.resumeAvailable': '由于页面重新加载，转换在完成 {total} 个章节中的 {done} 个后停止——iPhone 和 iPad 会在页面占用大量内存或锁屏时这样做。重新选择相同的文件，转换会自动继续。图书信息、封面和章节标题都已保留。',
   'convert.resumeReady': '{total} 个章节中已有 {done} 个转换完成——点击“生成 M4B”将从此处继续。',
   'convert.defaultFileName': '有声书',
 

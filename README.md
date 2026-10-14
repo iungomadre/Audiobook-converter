@@ -50,9 +50,15 @@ On phones the screen is kept awake during conversion (Screen Wake Lock).
 the tab after a few gigabytes, silently reloading the page. Finished chapter
 parts therefore stay on the device together with their packet sizes, and a
 small checkpoint in `localStorage` records which chapters are done. After a
-reload the app says how far it got; choosing the same files again (same names,
-sizes and dates, same audio quality) and pressing "Create M4B" continues with
+reload a banner at the top says how far it got; choosing the same files again
+(same names, sizes and dates, same audio quality) continues automatically with
 the remaining chapters. The result is identical to an uninterrupted run.
+Browsers forget picked files on reload, so that one step can't be automated.
+
+**Remembered between sessions** (IndexedDB): book details, cover, audio
+quality, and the chapter order and titles, which are reapplied when the same
+files are picked again. Picking a different book clears them; "Start over"
+removes everything, including unfinished conversions.
 
 ## Browser support
 

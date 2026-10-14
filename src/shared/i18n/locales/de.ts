@@ -3,6 +3,8 @@ import type { Messages } from './en';
 export const de: Messages = {
   'app.title': 'Hörbuch-Konverter',
   'app.tagline': 'Mach aus einem Ordner mit MP3-Dateien ein einziges M4B-Hörbuch mit Kapiteln und Cover – privat, in deinem Browser.',
+  'app.startOver': 'Neu beginnen',
+  'app.startOverConfirm': 'Mit einem neuen Buch neu beginnen? Die gewählten Dateien, Buchdetails, das Cover und eine unfertige Konvertierung werden entfernt.',
   'app.language': 'Sprache',
 
   'section.files': 'Audiodateien',
@@ -64,7 +66,7 @@ export const de: Messages = {
   'convert.interrupted': 'Die letzte Konvertierung wurde unterbrochen und die Seite neu geladen. Auf iPhone und iPad passiert das, wenn sich der Bildschirm sperrt, du zu einer anderen App wechselst oder Safari der Speicher ausgeht. Lass Safari mit eingeschaltetem Bildschirm geöffnet und versuche es erneut.',
   'convert.lowStorage': 'Auf deinem Gerät ist im Browser vielleicht nicht genug Speicher für dieses Buch frei. Gib etwas Speicher frei und versuche es erneut.',
   'convert.tryAnyway': 'Trotzdem versuchen?',
-  'convert.resumeAvailable': '{done} von {total} Kapiteln wurden konvertiert, bevor die Seite neu geladen wurde. Wähle dieselben Dateien erneut und drücke „M4B erstellen“, um dort weiterzumachen.',
+  'convert.resumeAvailable': 'Die Konvertierung wurde nach {done} von {total} Kapiteln gestoppt, weil die Seite neu geladen wurde – iPhone und iPad tun das, wenn eine Seite viel Speicher braucht oder sich der Bildschirm sperrt. Wähle dieselben Dateien erneut, dann geht es automatisch weiter. Buchdetails, Cover und Kapiteltitel bleiben erhalten.',
   'convert.resumeReady': '{done} von {total} Kapiteln sind bereits konvertiert – „M4B erstellen“ macht dort weiter.',
   'convert.defaultFileName': 'Hörbuch',
 

@@ -3,6 +3,8 @@ import type { Messages } from './en';
 export const pl: Messages = {
   'app.title': 'Konwerter audiobooków',
   'app.tagline': 'Zamień folder plików MP3 w jeden audiobook M4B z rozdziałami i okładką — prywatnie, w przeglądarce.',
+  'app.startOver': 'Zacznij od nowa',
+  'app.startOverConfirm': 'Zacząć od nowa z inną książką? Wybrane pliki, informacje o książce, okładka i niedokończona konwersja zostaną usunięte.',
   'app.language': 'Język',
 
   'section.files': 'Pliki audio',
@@ -69,7 +71,7 @@ export const pl: Messages = {
   'convert.interrupted': 'Poprzednia konwersja została przerwana, a strona przeładowana. Na iPhonie i iPadzie dzieje się tak, gdy ekran się zablokuje, przełączysz się do innej aplikacji albo Safari zabraknie pamięci. Nie zamykaj Safari, nie wygaszaj ekranu i spróbuj ponownie.',
   'convert.lowStorage': 'Na urządzeniu może brakować wolnego miejsca w pamięci przeglądarki na tę książkę. Zwolnij trochę miejsca i spróbuj ponownie.',
   'convert.tryAnyway': 'Spróbować mimo to?',
-  'convert.resumeAvailable': 'Przed przeładowaniem strony przekonwertowano {done} z {total} rozdziałów. Wybierz ponownie te same pliki i naciśnij „Utwórz M4B”, aby kontynuować od tego miejsca.',
+  'convert.resumeAvailable': 'Konwersja zatrzymała się po {done} z {total} rozdziałów, bo strona została przeładowana — iPhone i iPad robią tak, gdy strona zużywa dużo pamięci albo ekran się zablokuje. Wybierz ponownie te same pliki, a konwersja będzie kontynuowana automatycznie. Informacje o książce, okładka i tytuły rozdziałów zostały zachowane.',
   'convert.resumeReady': '{done} z {total} rozdziałów jest już przekonwertowanych — „Utwórz M4B” kontynuuje od tego miejsca.',
   'convert.defaultFileName': 'Audiobook',
 

@@ -1,4 +1,6 @@
-import { numberedTitle, type BookStore, type Chapter } from '@/entities/book';
+import {
+  arrangeLikeDraft, forgetRememberedChapters, hasRememberedChapters, numberedTitle, type BookStore, type Chapter,
+} from '@/entities/book';
 import { normalizeCover } from '@/shared/lib/image';
 import { probeAudioFile } from '@/shared/lib/media';
 import { prepareFiles, type PickedFile } from '../lib/collect-files';
@@ -8,16 +10,25 @@ let generation = 0;
 /**
  * Replaces the chapter list with the picked files, then probes durations in the background
  * and pre-fills empty metadata (title, author, year, cover) from the first file's tags.
+ * Picking the same files as in the last session restores their order and titles.
  */
 export const loadFiles = async (store: BookStore, picked: readonly PickedFile[]): Promise<number> => {
   const files = prepareFiles(picked);
   const current = ++generation;
 
-  const chapters: Chapter[] = files.map(({ file, path }, index) => ({
+  const remembered = arrangeLikeDraft(files);
+  if (!remembered && hasRememberedChapters()) {
+    // A different book than last time: its details and cover don't apply.
+    store.resetDetails();
+  }
+  forgetRememberedChapters();
+
+  const ordered = remembered ?? files.map((item, index) => ({ item, title: numberedTitle(index) }));
+  const chapters: Chapter[] = ordered.map(({ item: { file, path }, title }) => ({
     id: crypto.randomUUID(),
     file,
     path,
-    title: numberedTitle(index),
+    title,
     durationSeconds: null,
   }));
   store.setChapters(chapters);

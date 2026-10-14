@@ -32,6 +32,16 @@ export const createBookStore = () => {
       set({ cover });
     },
     setPreset: (presetId: string) => set({ presetId }),
+    /** Clears files, details and cover (the audio quality is kept). */
+    reset: () => {
+      if (book.cover) URL.revokeObjectURL(book.cover.previewUrl);
+      set({ chapters: [], metadata: { ...EMPTY_METADATA }, cover: null });
+    },
+    /** Clears details and cover, e.g. when a different book's files are picked. */
+    resetDetails: () => {
+      if (book.cover) URL.revokeObjectURL(book.cover.previewUrl);
+      set({ metadata: { ...EMPTY_METADATA }, cover: null });
+    },
   };
 };
 

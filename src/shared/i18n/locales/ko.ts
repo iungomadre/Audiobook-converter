@@ -3,6 +3,8 @@ import type { Messages } from './en';
 export const ko: Messages = {
   'app.title': '오디오북 변환기',
   'app.tagline': 'MP3 파일 폴더를 챕터와 표지가 있는 하나의 M4B 오디오북으로 바꿔 줍니다. 모든 작업은 브라우저 안에서 비공개로 처리됩니다.',
+  'app.startOver': '처음부터 다시',
+  'app.startOverConfirm': '다른 책으로 처음부터 다시 시작할까요? 선택한 파일, 책 정보, 표지, 완료되지 않은 변환이 삭제됩니다.',
   'app.language': '언어',
 
   'section.files': '오디오 파일',
@@ -64,7 +66,7 @@ export const ko: Messages = {
   'convert.interrupted': '이전 변환이 중단되어 페이지가 다시 로드되었습니다. iPhone과 iPad에서는 화면이 잠기거나, 다른 앱으로 전환하거나, Safari의 메모리가 부족할 때 이런 일이 생깁니다. 화면을 켠 채로 Safari를 열어 두고 다시 시도하세요.',
   'convert.lowStorage': '이 책을 저장할 브라우저 저장 공간이 부족할 수 있습니다. 공간을 확보한 뒤 다시 시도하세요.',
   'convert.tryAnyway': '그래도 시도할까요?',
-  'convert.resumeAvailable': '페이지가 다시 로드되기 전에 챕터 {total}개 중 {done}개가 변환되었습니다. 같은 파일을 다시 선택하고 “M4B 만들기”를 누르면 이어서 진행합니다.',
+  'convert.resumeAvailable': '페이지가 다시 로드되어 챕터 {total}개 중 {done}개에서 변환이 멈췄습니다. iPhone과 iPad는 페이지가 메모리를 많이 쓰거나 화면이 잠기면 이렇게 합니다. 같은 파일을 다시 선택하면 자동으로 이어서 진행합니다. 책 정보, 표지, 챕터 제목은 그대로 유지됩니다.',
   'convert.resumeReady': '챕터 {total}개 중 {done}개는 이미 변환되었습니다. “M4B 만들기”를 누르면 이어서 진행합니다.',
   'convert.defaultFileName': '오디오북',
 
