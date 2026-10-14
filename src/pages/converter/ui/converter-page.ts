@@ -1,5 +1,5 @@
 import { clearDraft, hasRememberedChapters, type Book, type BookStore } from '@/entities/book';
-import { createConvertPanel } from '@/features/convert-book';
+import { createConvertPanel, type Phase } from '@/features/convert-book';
 import { refillDetailsFromFiles } from '@/features/select-audio-files';
 import { createLanguagePicker } from '@/features/select-language';
 import { t, tr, type MessageKey } from '@/shared/i18n';
@@ -23,47 +23,66 @@ const section = (step: number, title: MessageKey, content: HTMLElement) =>
 const lockScope = (content: HTMLElement) => h('fieldset', { class: 'lock-scope' }, content);
 
 export const createConverterPage = (store: BookStore): HTMLElement => {
-  const scopes = [lockScope(createBookSetup(store)), lockScope(createBookDetails(store))];
-  const editableSections = [section(1, 'section.files', scopes[0]), section(2, 'section.details', scopes[1])];
+  const setup = createBookSetup(store);
+  const details = lockScope(createBookDetails(store));
+  const filesSection = section(1, 'section.files', setup.element);
+  const detailsSection = section(2, 'section.details', details);
 
-  const { panel, statusBar, banner, discard, hasSavedProgress } = createConvertPanel(store, {
-    onBusyChange: (busy) => {
-      // While converting, the book can be reviewed but not changed.
-      scopes.forEach((scope) => (scope.disabled = busy));
-      editableSections.forEach((element) => element.classList.toggle('is-locked', busy));
-      if (busy) convertSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      updateStartOver();
-    },
-    onStartFresh: () => void refillDetailsFromFiles(store),
-  });
-  const convertSection = section(3, 'section.convert', panel);
-
-  // Start over: forget the files, details, cover and any unfinished conversion.
-  const startOver = h('button', { type: 'button', class: 'btn small start-over' }, tr('app.startOver'));
-  startOver.addEventListener('click', () => {
+  // Start over: forget the files, details, cover and any unfinished conversion. Destructive, so confirmed.
+  const startOver = () => {
     if (!confirm(t('app.startOverConfirm'))) return;
     discard();
     void clearDraft();
     store.reset();
     updateStartOver();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+  };
 
-  // Offer "Start over" only when there is something to clear.
+  let phase: Phase = 'setup';
+  let built = false; // The panel reports its first phase while it is being created.
+  const applyPhase = () => {
+    // Setup: everything editable. Converting: the book is visible but locked. Awaiting files after a
+    // reload: only choosing the files again is possible. Done: only the result is shown.
+    setup.setMode(phase === 'setup' ? 'edit' : phase === 'awaiting-files' ? 'pick-only' : 'locked');
+    details.disabled = phase !== 'setup';
+    filesSection.classList.toggle('is-locked', phase === 'converting');
+    detailsSection.classList.toggle('is-locked', phase === 'converting');
+    filesSection.hidden = detailsSection.hidden = phase === 'done';
+    updateStartOver();
+    if (phase === 'converting') convertSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (phase === 'done') window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const { panel, statusBar, banner, discard, hasSavedProgress } = createConvertPanel(store, {
+    onPhaseChange: (next) => {
+      phase = next;
+      if (built) applyPhase();
+    },
+    onStartFresh: () => void refillDetailsFromFiles(store),
+    onStartOver: startOver,
+  });
+  const convertSection = section(3, 'section.convert', panel);
+
+  const startOverButton = h('button', { type: 'button', class: 'btn small start-over', onclick: startOver }, tr('app.startOver'));
+  // Offer "Start over" only when there is something to clear (the result view has its own button).
   const updateStartOver = () => {
-    startOver.hidden = !(hasContent(store.get()) || hasRememberedChapters() || hasSavedProgress());
+    startOverButton.hidden = phase === 'done' || !(hasContent(store.get()) || hasRememberedChapters() || hasSavedProgress());
   };
   store.subscribe(updateStartOver);
 
   // The status bar sits outside the centered column so it spans the full width while sticking to the top.
-  return h('div', {},
+  const page = h('div', {},
     statusBar,
     h('main', { class: 'page' },
       // The language can change at any time, even mid-conversion: only the page text changes.
-      createAppHeader([h('div', { class: 'header-actions' }, startOver, createLanguagePicker())]),
+      createAppHeader([h('div', { class: 'header-actions' }, startOverButton, createLanguagePicker())]),
       banner,
-      ...editableSections,
+      filesSection,
+      detailsSection,
       convertSection,
     ),
   );
+  built = true;
+  applyPhase();
+  return page;
 };

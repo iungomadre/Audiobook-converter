@@ -14,9 +14,20 @@ const outputFileName = (store: BookStore): string => {
 
 const describeError = ({ key, params, message }: ErrorInfo): string => (key ? t(key, params) : message);
 
+/**
+ * What the whole page should offer:
+ * - `setup`: everything editable;
+ * - `converting`: book locked, progress shown;
+ * - `awaiting-files`: a conversion was interrupted by a reload; only picking the files again makes sense;
+ * - `done`: only the result (save, convert again, start over).
+ */
+export type Phase = 'setup' | 'converting' | 'awaiting-files' | 'done';
+
 type ConvertPanelOptions = {
-  /** Called when a conversion starts (true) or stops for any reason (false). */
-  onBusyChange?: (busy: boolean) => void;
+  /** Called whenever the phase changes (and once initially). */
+  onPhaseChange?: (phase: Phase) => void;
+  /** Called by the result's "Start over" button. */
+  onStartOver?: () => void;
   /** Called when the user drops an unfinished conversion to start anew with the files now picked. */
   onStartFresh?: () => void;
 };
@@ -36,7 +47,7 @@ export type ConvertPanel = {
   hasSavedProgress: () => boolean;
 };
 
-export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFresh }: ConvertPanelOptions = {}): ConvertPanel => {
+export const createConvertPanel = (store: BookStore, { onPhaseChange, onStartFresh, onStartOver }: ConvertPanelOptions = {}): ConvertPanel => {
   const wasInterrupted = interruptedFlag.consume();
   const conversion = createConversion();
   const unsupported = getUnsupportedReason();
@@ -66,6 +77,15 @@ export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFres
   const cancelButton = h('button', { type: 'button', class: 'btn', onclick: () => conversion.cancel() }, tr('convert.cancel'));
   const saveButton = h('button', { type: 'button', class: 'btn primary large' }, tr('convert.save'));
   const againButton = h('button', { type: 'button', class: 'btn', onclick: () => conversion.reset() }, tr('convert.again'));
+  const startOverButton = h('button', { type: 'button', class: 'btn', onclick: () => onStartOver?.() }, tr('app.startOver'));
+
+  // The finished book: cover, title and author, shown instead of the controls.
+  const resultCover = h('img', { class: 'result-cover', alt: '' });
+  const resultTitle = h('strong', { class: 'result-title' });
+  const resultAuthor = h('span', { class: 'muted' });
+  const result = h('div', { class: 'result' }, resultCover, h('div', { class: 'result-text' }, resultTitle, resultAuthor));
+  let phase: Phase | null = null;
+  const privacyNote = h('p', { class: 'muted small' }, tr('convert.privacy'));
 
   convertButton.addEventListener('click', async () => {
     const book = store.get();
@@ -95,15 +115,30 @@ export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFres
   });
 
   const render = (state: ConversionState) => {
-    const { chapters, presetId } = store.get();
+    const { chapters, presetId, metadata, cover } = store.get();
     const total = totalDuration(chapters);
     const preset = getPreset(presetId);
     const running = state.status === 'running';
+    const done = state.status === 'done';
+    const awaitingFiles = (state.status === 'idle' || state.status === 'error') && autoContinue && conversion.savedProgress() !== null;
 
-    convertButton.hidden = running || state.status === 'done';
+    const nextPhase: Phase = running ? 'converting' : done ? 'done' : awaitingFiles ? 'awaiting-files' : 'setup';
+    if (nextPhase !== phase) {
+      phase = nextPhase;
+      onPhaseChange?.(phase);
+    }
+
+    convertButton.hidden = running || done || awaitingFiles;
     convertButton.disabled = !!unsupported || chapters.length === 0;
     cancelButton.hidden = !running;
-    saveButton.hidden = againButton.hidden = state.status !== 'done';
+    saveButton.hidden = againButton.hidden = startOverButton.hidden = result.hidden = !done;
+    privacyNote.hidden = done;
+    if (done) {
+      resultTitle.textContent = metadata.title || t('convert.defaultFileName');
+      resultAuthor.textContent = metadata.author;
+      resultCover.hidden = !cover;
+      if (cover) resultCover.src = cover.previewUrl;
+    }
     progress.hidden = !running;
     statusBar.hidden = !running || panelVisible;
 
@@ -117,7 +152,7 @@ export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFres
     if (saved && differentFiles) differentFilesNotice.firstElementChild!.textContent = t('convert.differentFiles', saved);
     interruptedNotice.hidden = !showInterrupted || state.status !== 'idle';
 
-    estimate.hidden = running || state.status === 'done' || chapters.length === 0;
+    estimate.hidden = running || done || awaitingFiles || chapters.length === 0;
     estimate.textContent = [
       total === null ? '' : t('convert.estimate', { length: formatDuration(total), size: formatBytes((preset.bitrate / 8) * total) }),
       resumable ? t('convert.resumeReady', resumable) : '',
@@ -133,7 +168,7 @@ export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFres
         size: formatBytes(state.size),
         time: formatDuration(state.elapsedMs / 1000),
       });
-    } else if (chapters.length === 0) message.textContent = t('convert.empty');
+    } else if (chapters.length === 0 && !awaitingFiles) message.textContent = t('convert.empty');
     else message.textContent = '';
 
     if (state.status === 'running' && state.progress) {
@@ -159,12 +194,6 @@ export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFres
     else if (status === 'done' || (status === 'idle' && previousStatus === 'running')) setConversionPending(store, false);
     previousStatus = status;
   });
-  let busy = false;
-  conversion.subscribe((state) => {
-    if ((state.status === 'running') === busy) return;
-    busy = !busy;
-    onBusyChange?.(busy);
-  });
   // Keep the estimate and button state in sync with the book and the language.
   store.subscribe((book) => {
     render(conversion.get());
@@ -178,11 +207,12 @@ export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFres
   onLanguageChange(() => render(conversion.get()));
 
   const panel = h('div', { class: 'convert' },
+    result,
     estimate,
-    h('div', { class: 'row' }, convertButton, saveButton, cancelButton, againButton),
+    h('div', { class: 'row' }, convertButton, saveButton, cancelButton, againButton, startOverButton),
     progress,
     message,
-    h('p', { class: 'muted small' }, tr('convert.privacy')),
+    privacyNote,
   );
 
   // Show the top status bar only while the progress in the panel is scrolled out of view.

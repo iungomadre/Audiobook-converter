@@ -1,1 +1,1 @@
-export { createBookSetup } from './ui/book-setup';
+export { createBookSetup, type BookSetupMode } from './ui/book-setup';
