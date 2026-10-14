@@ -71,6 +71,18 @@ body { margin: 0; background: var(--bg); }
   font-size: 0.9rem;
 }
 
+.locked-label {
+  display: none;
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.card.is-locked { opacity: 0.6; }
+.card.is-locked .locked-label { display: inline; }
+/* Inert content can't be scrolled, so show every chapter and let the page scroll instead. */
+.card.is-locked .chapter-list { max-height: none; overflow: visible; }
+
 .muted { color: var(--muted); }
 .small { font-size: 0.85rem; }
 .error { color: var(--error); }

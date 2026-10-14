@@ -10,7 +10,12 @@ const outputFileName = (store: BookStore): string => {
   return `${sanitizeFileName([author, title].filter(Boolean).join(' - ') || 'Audiobook')}.m4b`;
 };
 
-export const createConvertPanel = (store: BookStore): HTMLElement => {
+type ConvertPanelOptions = {
+  /** Called when a conversion starts (true) or stops for any reason (false). */
+  onBusyChange?: (busy: boolean) => void;
+};
+
+export const createConvertPanel = (store: BookStore, { onBusyChange }: ConvertPanelOptions = {}): HTMLElement => {
   const wasInterrupted = interruptedFlag.consume();
   const conversion = createConversion();
   const unsupported = getUnsupportedReason();
@@ -93,6 +98,12 @@ export const createConvertPanel = (store: BookStore): HTMLElement => {
   };
 
   conversion.subscribe(render);
+  let busy = false;
+  conversion.subscribe((state) => {
+    if ((state.status === 'running') === busy) return;
+    busy = !busy;
+    onBusyChange?.(busy);
+  });
   // Keep the estimate and button state in sync with the book being edited.
   store.subscribe(() => render(conversion.get()));
 
