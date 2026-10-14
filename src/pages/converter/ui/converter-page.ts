@@ -55,12 +55,15 @@ export const createConverterPage = (store: BookStore): HTMLElement => {
   };
   store.subscribe(updateStartOver);
 
-  return h('main', { class: 'page' },
+  // The status bar sits outside the centered column so it spans the full width while sticking to the top.
+  return h('div', {},
     statusBar,
-    // The language can change at any time, even mid-conversion: only the page text changes.
-    createAppHeader([h('div', { class: 'header-actions' }, startOver, createLanguagePicker())]),
-    banner,
-    ...editableSections,
-    convertSection,
+    h('main', { class: 'page' },
+      // The language can change at any time, even mid-conversion: only the page text changes.
+      createAppHeader([h('div', { class: 'header-actions' }, startOver, createLanguagePicker())]),
+      banner,
+      ...editableSections,
+      convertSection,
+    ),
   );
 };

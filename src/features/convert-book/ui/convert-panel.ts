@@ -105,12 +105,7 @@ export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFres
     cancelButton.hidden = !running;
     saveButton.hidden = againButton.hidden = state.status !== 'done';
     progress.hidden = !running;
-    const showStatusBar = running && !panelVisible;
-    if (statusBar.hidden === showStatusBar) {
-      statusBar.hidden = !showStatusBar;
-      // Make room at the top of the page so the bar never covers the title or anything else.
-      document.documentElement.style.setProperty('--status-bar-space', showStatusBar ? `${statusBar.offsetHeight}px` : '0px');
-    }
+    statusBar.hidden = !running || panelVisible;
 
     const idle = state.status === 'idle' || state.status === 'error';
     const resumable = idle ? conversion.resumableFor(store.get()) : null;
