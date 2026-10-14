@@ -46,7 +46,29 @@ body { margin: 0; background: var(--bg); padding-top: var(--status-bar-space, 0p
 .header-actions { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
 .banner { display: grid; gap: 8px; }
 .banner p { margin: 0; }
-.banner .notice { display: grid; gap: 8px; justify-items: start; }
+.banner .notice { display: grid; gap: 6px; justify-items: start; }
+.banner strong { font-size: 1.05rem; }
+.why summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.9rem;
+  list-style: none;
+}
+.why summary::-webkit-details-marker { display: none; }
+.why-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.why p { margin: 6px 0 0; font-size: 0.9rem; color: var(--muted); }
 .banner:not(:has(.notice:not([hidden]))) { display: none; }
 .language-picker {
   width: auto;
