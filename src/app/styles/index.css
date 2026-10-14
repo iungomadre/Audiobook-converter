@@ -43,7 +43,18 @@ body { margin: 0; background: var(--bg); }
 
 .app-header h1 { margin: 8px 0 4px; font-size: 1.9rem; }
 .app-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.header-actions { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.header-actions { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.icon-link {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  background: var(--surface);
+}
+.icon-link:hover { border-color: var(--accent); }
 .banner { display: grid; gap: 8px; }
 .banner p { margin: 0; }
 .banner .notice { display: grid; gap: 8px; justify-items: start; }
@@ -54,6 +65,7 @@ body { margin: 0; background: var(--bg); }
   font-size: 0.95rem;
 }
 .app-header p { margin: 0; }
+.app-header .local-note { margin-top: 6px; }
 
 .card {
   background: var(--surface);

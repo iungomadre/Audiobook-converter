@@ -5,6 +5,8 @@ export const ptBR: Messages = {
   'app.tagline': 'Transforme uma pasta de arquivos MP3 em um único audiolivro M4B com capítulos e capa — com privacidade, no seu navegador.',
   'app.startOver': 'Recomeçar',
   'app.startOverConfirm': 'Recomeçar com outro livro? Os arquivos escolhidos, os detalhes do livro, a capa e qualquer conversão não concluída serão removidos.',
+  'app.localNote': 'Código aberto e totalmente local: seus arquivos nunca saem deste dispositivo e, depois que a página carrega, ela funciona mesmo sem internet.',
+  'app.sourceCode': 'Código-fonte no GitHub',
   'app.language': 'Idioma',
 
   'section.files': 'Arquivos de áudio',

@@ -6,6 +6,8 @@ export const en = {
   'app.tagline': 'Turn a folder of MP3 files into a single M4B audiobook with chapters and a cover — privately, in your browser.',
   'app.startOver': 'Start over',
   'app.startOverConfirm': 'Start over with a new book? The selected files, book details, cover and any unfinished conversion will be removed.',
+  'app.localNote': 'Open source and fully local: your files never leave this device, and once the page has loaded it keeps working with the internet switched off.',
+  'app.sourceCode': 'Source code on GitHub',
   'app.language': 'Language',
 
   'section.files': 'Audio files',

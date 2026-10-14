@@ -5,6 +5,8 @@ export const ko: Messages = {
   'app.tagline': 'MP3 파일 폴더를 챕터와 표지가 있는 하나의 M4B 오디오북으로 바꿔 줍니다. 모든 작업은 브라우저 안에서 비공개로 처리됩니다.',
   'app.startOver': '처음부터 다시',
   'app.startOverConfirm': '다른 책으로 처음부터 다시 시작할까요? 선택한 파일, 책 정보, 표지, 완료되지 않은 변환이 삭제됩니다.',
+  'app.localNote': '오픈 소스이며 완전히 로컬에서 동작합니다. 파일은 이 기기를 벗어나지 않으며, 페이지가 한 번 로드되면 인터넷을 꺼도 계속 작동합니다.',
+  'app.sourceCode': 'GitHub의 소스 코드',
   'app.language': '언어',
 
   'section.files': '오디오 파일',

@@ -5,6 +5,8 @@ export const id: Messages = {
   'app.tagline': 'Ubah folder berisi file MP3 menjadi satu buku audio M4B lengkap dengan bab dan sampul — secara pribadi, di browser Anda.',
   'app.startOver': 'Mulai dari awal',
   'app.startOverConfirm': 'Mulai dari awal dengan buku lain? File yang dipilih, detail buku, sampul, dan konversi yang belum selesai akan dihapus.',
+  'app.localNote': 'Sumber terbuka dan sepenuhnya lokal: file Anda tidak pernah meninggalkan perangkat ini, dan setelah halaman dimuat, aplikasi tetap berjalan meski internet dimatikan.',
+  'app.sourceCode': 'Kode sumber di GitHub',
   'app.language': 'Bahasa',
 
   'section.files': 'File audio',

@@ -5,6 +5,8 @@ export const pl: Messages = {
   'app.tagline': 'Zamień folder plików MP3 w jeden audiobook M4B z rozdziałami i okładką — prywatnie, w przeglądarce.',
   'app.startOver': 'Zacznij od nowa',
   'app.startOverConfirm': 'Zacząć od nowa z inną książką? Wybrane pliki, informacje o książce, okładka i niedokończona konwersja zostaną usunięte.',
+  'app.localNote': 'Otwarte oprogramowanie, działa w całości lokalnie: pliki nigdy nie opuszczają tego urządzenia, a po załadowaniu strony działa nawet z wyłączonym internetem.',
+  'app.sourceCode': 'Kod źródłowy na GitHubie',
   'app.language': 'Język',
 
   'section.files': 'Pliki audio',

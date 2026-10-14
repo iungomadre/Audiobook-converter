@@ -5,6 +5,8 @@ export const nl: Messages = {
   'app.tagline': 'Maak van een map met MP3-bestanden één M4B-luisterboek met hoofdstukken en een omslag — privé, in je browser.',
   'app.startOver': 'Opnieuw beginnen',
   'app.startOverConfirm': 'Opnieuw beginnen met een ander boek? De gekozen bestanden, boekgegevens, omslag en een onvoltooide conversie worden verwijderd.',
+  'app.localNote': 'Open source en volledig lokaal: je bestanden verlaten dit apparaat nooit, en zodra de pagina geladen is werkt hij ook zonder internet.',
+  'app.sourceCode': 'Broncode op GitHub',
   'app.language': 'Taal',
 
   'section.files': 'Audiobestanden',

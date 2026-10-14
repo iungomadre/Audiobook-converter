@@ -5,6 +5,8 @@ export const de: Messages = {
   'app.tagline': 'Mach aus einem Ordner mit MP3-Dateien ein einziges M4B-Hörbuch mit Kapiteln und Cover – privat, in deinem Browser.',
   'app.startOver': 'Neu beginnen',
   'app.startOverConfirm': 'Mit einem neuen Buch neu beginnen? Die gewählten Dateien, Buchdetails, das Cover und eine unfertige Konvertierung werden entfernt.',
+  'app.localNote': 'Open Source und komplett lokal: Deine Dateien verlassen dieses Gerät nie, und sobald die Seite geladen ist, funktioniert sie auch ohne Internet.',
+  'app.sourceCode': 'Quellcode auf GitHub',
   'app.language': 'Sprache',
 
   'section.files': 'Audiodateien',

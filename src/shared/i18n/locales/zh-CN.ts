@@ -5,6 +5,8 @@ export const zhCN: Messages = {
   'app.tagline': '把一个 MP3 文件夹转换成一本带章节和封面的 M4B 有声书——完全在浏览器中私密完成。',
   'app.startOver': '重新开始',
   'app.startOverConfirm': '要用另一本书重新开始吗？已选择的文件、图书信息、封面以及未完成的转换都将被删除。',
+  'app.localNote': '开源且完全在本地运行：你的文件绝不会离开此设备；页面加载后，即使关闭网络也能继续使用。',
+  'app.sourceCode': 'GitHub 上的源代码',
   'app.language': '语言',
 
   'section.files': '音频文件',

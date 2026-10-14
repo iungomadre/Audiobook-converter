@@ -63,6 +63,11 @@ quality, and the chapter order and titles, which are reapplied when the same
 files are picked again. Picking a different book clears them; "Start over"
 removes everything, including unfinished conversions.
 
+**Offline.** A service worker (generated at build time, see
+`vite.config.ts`) stores every file of the app on the first visit, so after
+that the app loads and converts with the internet switched off. Only "Search
+Google Images" needs a connection.
+
 ## Browser support
 
 Needs WebCodecs audio decoding and OPFS: current Chrome, Edge and Firefox, and

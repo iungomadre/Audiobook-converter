@@ -5,6 +5,8 @@ export const tr: Messages = {
   'app.tagline': 'Bir MP3 klasörünü bölümleri ve kapağıyla tek bir M4B sesli kitaba dönüştürün — gizli kalarak, tarayıcınızda.',
   'app.startOver': 'Baştan başla',
   'app.startOverConfirm': 'Yeni bir kitapla baştan başlansın mı? Seçilen dosyalar, kitap bilgileri, kapak ve tamamlanmamış dönüştürme silinecek.',
+  'app.localNote': 'Açık kaynak ve tamamen yerel: dosyalarınız bu cihazdan asla çıkmaz; sayfa bir kez yüklendikten sonra internet kapalıyken de çalışır.',
+  'app.sourceCode': 'GitHub’daki kaynak kodu',
   'app.language': 'Dil',
 
   'section.files': 'Ses dosyaları',

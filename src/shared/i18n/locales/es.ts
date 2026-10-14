@@ -5,6 +5,8 @@ export const es: Messages = {
   'app.tagline': 'Convierte una carpeta de archivos MP3 en un único audiolibro M4B con capítulos y portada, de forma privada, en tu navegador.',
   'app.startOver': 'Empezar de nuevo',
   'app.startOverConfirm': '¿Empezar de nuevo con otro libro? Se eliminarán los archivos elegidos, los datos del libro, la portada y cualquier conversión sin terminar.',
+  'app.localNote': 'Código abierto y totalmente local: tus archivos nunca salen de este dispositivo y, una vez cargada la página, sigue funcionando sin conexión a internet.',
+  'app.sourceCode': 'Código fuente en GitHub',
   'app.language': 'Idioma',
 
   'section.files': 'Archivos de audio',

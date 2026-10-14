@@ -75,7 +75,7 @@ export const createConverterPage = (store: BookStore): HTMLElement => {
     statusBar,
     h('main', { class: 'page' },
       // The language can change at any time, even mid-conversion: only the page text changes.
-      createAppHeader([h('div', { class: 'header-actions' }, startOverButton, createLanguagePicker())]),
+      createAppHeader([startOverButton, createLanguagePicker()]),
       banner,
       filesSection,
       detailsSection,
