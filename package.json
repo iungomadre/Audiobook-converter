@@ -1,0 +1,24 @@
+{
+  "name": "audiobook-converter",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Convert a folder of MP3 files into a single M4B audiobook, entirely in the browser.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@mediabunny/aac-encoder": "^1.61.4",
+    "mediabunny": "^1.61.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
+  }
+}
