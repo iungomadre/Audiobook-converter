@@ -1,3 +1,4 @@
+import type { ErrorInfo } from './errors';
 import type { BookMetadata } from '@/entities/book';
 
 export type ConversionJob = {
@@ -21,4 +22,4 @@ export type ConversionProgress = {
 export type WorkerResponse =
   | ({ type: 'progress' } & ConversionProgress)
   | { type: 'done'; outputName: string; size: number; durationSeconds: number; encoder: 'native' | 'wasm' }
-  | { type: 'error'; message: string };
+  | { type: 'error'; error: ErrorInfo };

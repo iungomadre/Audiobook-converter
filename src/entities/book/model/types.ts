@@ -1,3 +1,5 @@
+import type { MessageKey } from '@/shared/i18n';
+
 export type Chapter = {
   id: string;
   file: File;
@@ -26,7 +28,7 @@ export type Cover = {
 
 export type AudioPreset = {
   id: string;
-  label: string;
+  labelKey: MessageKey;
   numberOfChannels: 1 | 2;
   bitrate: number;
 };

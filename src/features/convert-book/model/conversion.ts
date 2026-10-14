@@ -1,4 +1,5 @@
-import { getPreset, totalDuration, type Book } from '@/entities/book';
+import type { ErrorInfo } from './errors';
+import { getPreset, numberedTitle, totalDuration, type Book } from '@/entities/book';
 import { clearOutputs, createScreenWakeLock, interruptedFlag } from '@/shared/lib/storage';
 import type { ConversionJob, ConversionProgress, WorkerRequest, WorkerResponse } from './protocol';
 
@@ -6,7 +7,7 @@ export type ConversionState =
   | { status: 'idle' }
   | { status: 'running'; progress: ConversionProgress | null; startedAt: number }
   | { status: 'done'; outputName: string; size: number; durationSeconds: number; elapsedMs: number; encoder: 'native' | 'wasm' }
-  | { status: 'error'; message: string };
+  | { status: 'error'; error: ErrorInfo };
 
 type Listener = (state: ConversionState) => void;
 
@@ -43,7 +44,7 @@ export const createConversion = () => {
       outputName,
       chapters: book.chapters.map(({ file, title, durationSeconds }, index) => ({
         file,
-        title: title.trim() || `Chapter ${index + 1}`,
+        title: title.trim() || numberedTitle(index),
         durationSeconds,
       })),
       metadata: book.metadata,
@@ -64,12 +65,12 @@ export const createConversion = () => {
         set({ ...data, status: 'done', elapsedMs: Date.now() - startedAt });
       } else {
         stopWorker();
-        set({ status: 'error', message: data.message });
+        set({ status: 'error', error: data.error });
       }
     };
     worker.onerror = (event) => {
       stopWorker();
-      set({ status: 'error', message: event.message || 'The converter stopped unexpectedly.' });
+      set({ status: 'error', error: { key: 'error.workerCrashed', message: event.message || 'Worker crashed' } });
     };
     worker.postMessage({ type: 'convert', job } satisfies WorkerRequest);
   };

@@ -1,3 +1,4 @@
+import { t } from '@/shared/i18n';
 import type { Book, BookMetadata, Chapter, Cover } from './types';
 import { AUDIO_PRESETS } from './presets';
 
@@ -41,4 +42,4 @@ export const totalDuration = (chapters: readonly Chapter[]): number | null =>
     ? chapters.reduce((sum, chapter) => sum + chapter.durationSeconds!, 0)
     : null;
 
-export const numberedTitle = (index: number): string => `Chapter ${index + 1}`;
+export const numberedTitle = (index: number): string => t('chapters.defaultTitle', { n: index + 1 });

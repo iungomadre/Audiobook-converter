@@ -1,3 +1,4 @@
+import { LocalizedError } from '../model/errors';
 import {
   AdtsOutputFormat, ALL_FORMATS, AudioSample, AudioSampleSink, AudioSampleSource, BlobSource, canEncodeAudio, Input,
   NullTarget, Output,
@@ -86,9 +87,10 @@ export const convertToM4b = async (
       const input = new Input({ formats: ALL_FORMATS, source: new BlobSource(chapter.file) });
       try {
         const track = await input.getPrimaryAudioTrack();
-        if (!track) throw new Error(`"${chapter.file.name}" contains no audio.`);
+        if (!track) throw new LocalizedError('error.noAudio', { file: chapter.file.name }, `"${chapter.file.name}" contains no audio.`);
         if (!(await track.canDecode())) {
-          throw new Error(`This browser cannot decode "${chapter.file.name}" (${track.codec ?? 'unknown codec'}).`);
+          const codec = track.codec ?? '?';
+          throw new LocalizedError('error.cannotDecode', { file: chapter.file.name, codec }, `Cannot decode "${chapter.file.name}" (${codec}).`);
         }
 
         const resampler = new StreamingResampler(track.sampleRate, SAMPLE_RATE, job.numberOfChannels);

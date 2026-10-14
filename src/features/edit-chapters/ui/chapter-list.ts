@@ -1,3 +1,4 @@
+import { onLanguageChange, t, tr, trAttr } from '@/shared/i18n';
 import { numberedTitle, totalDuration, type BookStore, type Chapter } from '@/entities/book';
 import { formatDuration, stripExtension } from '@/shared/lib/format';
 import { h } from '@/shared/ui';
@@ -28,10 +29,10 @@ export const createChapterList = (store: BookStore): HTMLElement => {
       type: 'text',
       class: 'chapter-title',
       value: chapter.title,
-      attrs: { 'aria-label': `Title of chapter ${index + 1}` },
       oninput: () => store.updateChapter(chapter.id, { title: input.value }),
     });
     const duration = h('span', { class: 'chapter-duration muted' });
+    trAttr(input, 'aria-label', 'chapters.titleLabel', { n: index + 1 });
     titleInputs.set(chapter.id, input);
     durationLabels.set(chapter.id, duration);
 
@@ -43,25 +44,31 @@ export const createChapterList = (store: BookStore): HTMLElement => {
       ),
       duration,
       h('div', { class: 'chapter-actions' },
-        h('button', { type: 'button', class: 'icon-btn', title: 'Move up', disabled: index === 0, onclick: () => move(index, -1) }, '↑'),
-        h('button', { type: 'button', class: 'icon-btn', title: 'Move down', disabled: index === count - 1, onclick: () => move(index, 1) }, '↓'),
-        h('button', { type: 'button', class: 'icon-btn', title: 'Remove', onclick: () => remove(chapter.id) }, '✕'),
+        trAttr(h('button', { type: 'button', class: 'icon-btn', disabled: index === 0, onclick: () => move(index, -1) }, '↑'), 'title', 'chapters.moveUp'),
+        trAttr(h('button', { type: 'button', class: 'icon-btn', disabled: index === count - 1, onclick: () => move(index, 1) }, '↓'), 'title', 'chapters.moveDown'),
+        trAttr(h('button', { type: 'button', class: 'icon-btn', onclick: () => remove(chapter.id) }, '✕'), 'title', 'chapters.remove'),
       ),
     );
   };
 
   const toolbar = h('div', { class: 'row' },
-    h('button', { type: 'button', class: 'btn small', onclick: () => renameAll((_, index) => numberedTitle(index)) }, 'Number chapters'),
-    h('button', { type: 'button', class: 'btn small', onclick: () => renameAll((chapter) => stripExtension(chapter.file.name)) }, 'Use file names'),
+    h('button', { type: 'button', class: 'btn small', onclick: () => renameAll((_, index) => numberedTitle(index)) }, tr('chapters.numberAll')),
+    h('button', { type: 'button', class: 'btn small', onclick: () => renameAll((chapter) => stripExtension(chapter.file.name)) }, tr('chapters.useFileNames')),
   );
 
   const element = h('div', { class: 'chapters' }, h('div', { class: 'row spread' }, summary, toolbar), list);
 
+  const renderSummary = () => {
+    const { chapters } = store.get();
+    const total = totalDuration(chapters);
+    summary.textContent = `${t('chapters.count', { count: chapters.length })} · ` +
+      (total === null ? t('chapters.measuring') : formatDuration(total));
+  };
+  onLanguageChange(renderSummary);
+
   store.subscribe(({ chapters }) => {
     element.hidden = chapters.length === 0;
-    const total = totalDuration(chapters);
-    summary.textContent = `${chapters.length} chapter${chapters.length === 1 ? '' : 's'}` +
-      (total === null ? ' · measuring length…' : ` · ${formatDuration(total)}`);
+    renderSummary();
 
     // Rebuild rows only when the order changes, so typing keeps focus.
     const key = chapters.map((chapter) => chapter.id).join('|');

@@ -1,3 +1,4 @@
+import { tr } from '@/shared/i18n';
 import type { BookStore } from '@/entities/book';
 import { h } from '@/shared/ui';
 import { fromDataTransfer, fromFileList, type PickedFile } from '../lib/collect-files';
@@ -7,9 +8,9 @@ export const createFilePicker = (store: BookStore): HTMLElement => {
   const status = h('p', { class: 'muted', attrs: { role: 'status' } });
 
   const handle = async (files: PickedFile[]) => {
-    status.textContent = 'Reading files…';
+    status.replaceChildren(tr('files.reading'));
     const audioCount = await loadFiles(store, files);
-    status.textContent = audioCount ? '' : 'No audio files found in this selection.';
+    status.replaceChildren(audioCount ? '' : tr('files.noAudio'));
   };
 
   const folderInput = h('input', { type: 'file', multiple: true, hidden: true, attrs: { webkitdirectory: '' } });
@@ -25,11 +26,11 @@ export const createFilePicker = (store: BookStore): HTMLElement => {
   const supportsFolders = 'webkitdirectory' in HTMLInputElement.prototype && !/Android|iPhone|iPad/i.test(navigator.userAgent);
 
   const dropzone = h('div', { class: 'dropzone' },
-    h('p', { class: 'dropzone-title' }, 'Drop the book folder here'),
-    h('p', { class: 'muted' }, 'or'),
+    h('p', { class: 'dropzone-title' }, tr('files.drop')),
+    h('p', { class: 'muted' }, tr('files.or')),
     h('div', { class: 'row center' },
-      supportsFolders && h('button', { type: 'button', class: 'btn primary', onclick: () => folderInput.click() }, 'Choose folder'),
-      h('button', { type: 'button', class: supportsFolders ? 'btn' : 'btn primary', onclick: () => filesInput.click() }, 'Choose files'),
+      supportsFolders && h('button', { type: 'button', class: 'btn primary', onclick: () => folderInput.click() }, tr('files.chooseFolder')),
+      h('button', { type: 'button', class: supportsFolders ? 'btn' : 'btn primary', onclick: () => filesInput.click() }, tr('files.chooseFiles')),
     ),
     folderInput,
     filesInput,

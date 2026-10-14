@@ -1,3 +1,4 @@
+import { toErrorInfo } from '../model/errors';
 /// <reference lib="webworker" />
 import { fromSyncAccessHandle, type SyncAccessHandle } from '@/shared/lib/mp4';
 import { getOutputDirectory } from '@/shared/lib/storage';
@@ -25,6 +26,6 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
     post({ type: 'done', outputName: job.outputName, size, ...result });
   } catch (error) {
     handle?.close();
-    post({ type: 'error', message: error instanceof Error ? error.message : String(error) });
+    post({ type: 'error', error: toErrorInfo(error) });
   }
 };

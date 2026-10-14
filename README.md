@@ -11,10 +11,14 @@ server: decoding, AAC encoding and MP4 writing all run on your device.
 - Chapter titles default to "Chapter N"; rename, reorder or remove them.
 - Title, author, narrator, year, genre, description and cover image.
   Fields and cover are pre-filled from the first file's ID3 tags when present.
-- Covers: upload, drop, paste (copy an image anywhere, then tap Paste or press
-  Ctrl/⌘+V), or "Search Google Images", which opens Google in a new tab so you
-  can copy a cover and paste it back. Every cover is made square for audiobook
-  players (non-square images are centered on a blurred fill, never cropped).
+- Covers: tap the cover box to pick an image (or drop one on it), or use
+  "Search Google Images", which opens a prefilled search in a new tab. Every
+  cover is made square for audiobook players (non-square images are centered
+  on a blurred fill, never cropped).
+- 15 languages with a flag picker: English, Polish, Spanish, French, German,
+  Italian, Portuguese (Brazil), Ukrainian, Dutch, Turkish, Indonesian, Hindi,
+  Chinese (Simplified), Japanese and Korean. The browser language is used by
+  default; the choice is remembered and can change at any time.
 - Output plays in Apple Books: AAC audio, QuickTime chapter track, Nero `chpl`
   chapters (other players), iTunes metadata and `stik = Audiobook`.
 - Long books (40 h+) are fine: audio is streamed through a Web Worker and the
@@ -72,8 +76,9 @@ src/
   features/
     select-audio-files/   folder/file picking, drag & drop, tag pre-fill
     edit-chapters/        chapter titles, order, removal
-    edit-book-metadata/   metadata form, cover (upload/paste/drop), audio quality
+    edit-book-metadata/   metadata form, cover (pick/drop), audio quality
     find-cover-online/    opens Google Images for the book in a new tab
+    select-language/      language picker with flags
     convert-book/         worker, conversion pipeline, progress, saving
   entities/
     book/                 book model, store, audio presets
@@ -81,12 +86,21 @@ src/
     lib/mp4/              streaming M4B writer (chapters, tags, cover)
     lib/audio/            channel remixing and streaming resampler
     lib/storage/          OPFS and file saving
+    i18n/                 translations, plural rules, live language switching
     lib/…                 natural sort, formatting, media probing, images
     ui/                   tiny DOM helper
 ```
 
 Layers only import from layers below them; slices expose a public API via
 their `index.ts`.
+
+## Translations
+
+Strings live in `src/shared/i18n/locales/<code>.ts`. English (`en.ts`) is the
+source: TypeScript rejects a locale that misses a key, and a test checks that
+every translation keeps the same `{placeholders}`. Plural forms (e.g. Polish
+`1 rozdział / 2 rozdziały / 5 rozdziałów`) use `Intl.PluralRules`. Translations
+other than English and Polish have not yet been reviewed by native speakers.
 
 ## Third-party licences
 

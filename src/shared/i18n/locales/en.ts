@@ -1,0 +1,78 @@
+import type { Message } from '../types';
+
+/** Source language. Every other locale must provide exactly these keys (checked by TypeScript). */
+export const en = {
+  'app.title': 'Audiobook Converter',
+  'app.tagline': 'Turn a folder of MP3 files into a single M4B audiobook with chapters and a cover — privately, in your browser.',
+  'app.language': 'Language',
+
+  'section.files': 'Audio files',
+  'section.details': 'Book details',
+  'section.convert': 'Convert',
+  'section.locked': 'Locked while converting',
+
+  'files.drop': 'Drop the book folder here',
+  'files.or': 'or',
+  'files.chooseFolder': 'Choose folder',
+  'files.chooseFiles': 'Choose files',
+  'files.reading': 'Reading files…',
+  'files.noAudio': 'No audio files found in this selection.',
+
+  'chapters.count': { one: '{count} chapter', other: '{count} chapters' },
+  'chapters.measuring': 'measuring length…',
+  'chapters.numberAll': 'Number chapters',
+  'chapters.useFileNames': 'Use file names',
+  'chapters.defaultTitle': 'Chapter {n}',
+  'chapters.titleLabel': 'Title of chapter {n}',
+  'chapters.moveUp': 'Move up',
+  'chapters.moveDown': 'Move down',
+  'chapters.remove': 'Remove',
+
+  'meta.title': 'Title',
+  'meta.author': 'Author',
+  'meta.narrator': 'Narrator',
+  'meta.year': 'Year',
+  'meta.yearPlaceholder': 'e.g. 2024',
+  'meta.genre': 'Genre',
+  'meta.description': 'Description',
+  'meta.quality': 'Audio quality',
+  'preset.mono-64': 'Mono · 64 kbps (recommended for speech)',
+  'preset.stereo-96': 'Stereo · 96 kbps',
+  'preset.stereo-128': 'Stereo · 128 kbps',
+
+  'cover.add': 'Add cover',
+  'cover.preview': 'Cover preview',
+  'cover.chooseHint': 'Choose or drop a cover image',
+  'cover.remove': 'Remove cover',
+  'cover.unreadable': 'This image could not be read. Try a JPEG or PNG file.',
+  'cover.searchGoogle': 'Search Google Images',
+  'cover.searchGoogleHint': 'Search Google Images in a new tab',
+  'cover.searchQuerySuffix': 'audiobook',
+
+  'convert.create': 'Create M4B',
+  'convert.cancel': 'Cancel',
+  'convert.save': 'Save audiobook',
+  'convert.again': 'Convert again',
+  'convert.estimate': 'Length {length} · estimated size {size}',
+  'convert.empty': 'Add the audio files of your book to start.',
+  'convert.done': 'Done! {length} of audio, {size}, converted in {time}.',
+  'convert.failed': 'Conversion failed: {reason}',
+  'convert.saveFailed': 'Saving failed: {reason}',
+  'convert.progressChapter': 'Chapter {n} of {total}',
+  'convert.timeLeft': 'about {time} left',
+  'convert.estimating': 'estimating time…',
+  'convert.privacy': 'Everything happens on this device — your files are never uploaded. Keep this tab open and in front while converting; on phones, keep the screen on.',
+  'convert.interrupted': 'Your previous conversion was interrupted and the page was reloaded. On iPhone and iPad this happens when the screen locks, you switch to another app, or Safari runs out of memory. Keep Safari open with the screen on and try again.',
+  'convert.lowStorage': 'Your device may not have enough free browser storage for this book. Free up some space and try again.',
+  'convert.tryAnyway': 'Try anyway?',
+  'convert.defaultFileName': 'Audiobook',
+
+  'error.noOpfs': 'This browser cannot store large files locally (no Origin Private File System).',
+  'error.noWebCodecs': 'This browser cannot decode audio in the background (WebCodecs is missing). Please use a recent Chrome, Edge, Firefox or Safari.',
+  'error.noAudio': '“{file}” contains no audio.',
+  'error.cannotDecode': 'This browser cannot decode “{file}” ({codec}).',
+  'error.workerCrashed': 'The converter stopped unexpectedly.',
+} satisfies Record<string, Message>;
+
+export type MessageKey = keyof typeof en;
+export type Messages = Record<MessageKey, Message>;

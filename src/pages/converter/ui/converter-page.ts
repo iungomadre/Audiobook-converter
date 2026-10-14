@@ -1,19 +1,21 @@
 import type { BookStore } from '@/entities/book';
 import { createConvertPanel } from '@/features/convert-book';
+import { createLanguagePicker } from '@/features/select-language';
+import { tr, type MessageKey } from '@/shared/i18n';
 import { h } from '@/shared/ui';
 import { createAppHeader } from '@/widgets/app-header';
 import { createBookDetails } from '@/widgets/book-details';
 import { createBookSetup } from '@/widgets/book-setup';
 
-const section = (step: number, title: string, content: HTMLElement) =>
+const section = (step: number, title: MessageKey, content: HTMLElement) =>
   h('section', { class: 'card' },
-    h('h2', {}, h('span', { class: 'step' }, step), title, h('span', { class: 'locked-label' }, 'Locked while converting')),
+    h('h2', {}, h('span', { class: 'step' }, step), tr(title), h('span', { class: 'locked-label' }, tr('section.locked'))),
     content);
 
 export const createConverterPage = (store: BookStore): HTMLElement => {
   const editableSections = [
-    section(1, 'Audio files', createBookSetup(store)),
-    section(2, 'Book details', createBookDetails(store)),
+    section(1, 'section.files', createBookSetup(store)),
+    section(2, 'section.details', createBookDetails(store)),
   ];
 
   // While converting, the book can be reviewed but not changed: `inert` blocks
@@ -26,8 +28,9 @@ export const createConverterPage = (store: BookStore): HTMLElement => {
   };
 
   return h('main', { class: 'page' },
-    createAppHeader(),
+    // The language can change at any time, even mid-conversion: only the page text changes.
+    createAppHeader([createLanguagePicker()]),
     ...editableSections,
-    section(3, 'Convert', createConvertPanel(store, { onBusyChange: setLocked })),
+    section(3, 'section.convert', createConvertPanel(store, { onBusyChange: setLocked })),
   );
 };
