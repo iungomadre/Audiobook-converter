@@ -42,15 +42,8 @@ export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFres
   const unsupported = getUnsupportedReason();
   let saveError: string | null = null;
 
-  // Reassurance first; the technical reason is one tap away for those who want it.
-  const explanation = () => h('details', { class: 'why' },
-    h('summary', {}, h('span', { class: 'why-icon', attrs: { 'aria-hidden': 'true' } }, '?'), tr('interrupted.why')),
-    h('p', {}, tr('interrupted.explanation')));
-  const interruptedNotice = h('div', { class: 'notice', hidden: true, attrs: { role: 'alert' } },
-    h('strong', {}, tr('interrupted.title')), h('p', {}, tr('interrupted.body')), explanation());
-  const resumeTitle = h('strong', {});
-  const resumeNotice = h('div', { class: 'notice', attrs: { role: 'alert' } },
-    resumeTitle, h('p', {}, tr('resume.body')), explanation());
+  const interruptedNotice = h('p', { class: 'notice', hidden: true, attrs: { role: 'alert' } }, tr('convert.interrupted'));
+  const resumeNotice = h('p', { class: 'notice', attrs: { role: 'alert' } });
   const startFreshButton = h('button', { type: 'button', class: 'btn small' }, tr('convert.startNew'));
   const differentFilesNotice = h('div', { class: 'notice', attrs: { role: 'alert' } },
     h('p', {}), startFreshButton);
@@ -124,7 +117,7 @@ export const createConvertPanel = (store: BookStore, { onBusyChange, onStartFres
     const saved = idle && !resumable ? conversion.savedProgress() : null;
     const differentFiles = !!saved && conversion.isDifferentBook(store.get());
     resumeNotice.hidden = !saved || differentFiles;
-    if (saved) resumeTitle.textContent = t('resume.title', saved);
+    if (saved) resumeNotice.textContent = t('convert.resumeAvailable', saved);
     differentFilesNotice.hidden = !differentFiles;
     if (saved && differentFiles) differentFilesNotice.firstElementChild!.textContent = t('convert.differentFiles', saved);
     interruptedNotice.hidden = !showInterrupted || state.status !== 'idle';
