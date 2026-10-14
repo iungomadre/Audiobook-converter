@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { findPath, parseBoxes } from './box';
 import { readFourCC } from './bytes';
-import { M4bWriter, MemoryFile } from './index';
+import { M4bWriter, MemoryFile, PacketWriter } from './index';
 
 const FIXTURE = readFileSync(new URL('./__fixtures__/tone-6s.aac', import.meta.url));
 const FORMAT = { sampleRate: 44_100, numberOfChannels: 1, bitrate: 32_000 };
@@ -39,7 +39,7 @@ const AUDIO_SPECIFIC_CONFIG = Uint8Array.of(0x12, 0x08);
 const writeFromRawPackets = (): MemoryFile => {
   const file = new MemoryFile();
   const writer = new M4bWriter(file, FORMAT);
-  for (const frame of adtsFrames()) writer.addPacket(frame.subarray(7), 1024, AUDIO_SPECIFIC_CONFIG);
+  for (const frame of adtsFrames()) writer.addPacket(frame.subarray(7), AUDIO_SPECIFIC_CONFIG);
   writer.finish({ chapters: CHAPTERS, metadata: METADATA });
   return file;
 };
@@ -48,7 +48,7 @@ const writeFromRawPackets = (): MemoryFile => {
 const writeFromAdtsFrames = (): MemoryFile => {
   const file = new MemoryFile();
   const writer = new M4bWriter(file, FORMAT);
-  for (const frame of adtsFrames()) writer.addPacket(frame, 1024);
+  for (const frame of adtsFrames()) writer.addPacket(frame);
   writer.finish({ chapters: CHAPTERS, metadata: METADATA });
   return file;
 };
@@ -76,6 +76,27 @@ describe('M4bWriter', () => {
     expect(findPath(moov, ['udta', 'chpl'])).toBeDefined();
     const ilst = findPath(moov, ['udta', 'meta', 'ilst'])!;
     expect(ilst.children!.map((box) => box.type)).toEqual(expect.arrayContaining(['©nam', '©ART', '©nrt', 'stik', 'covr']));
+  });
+
+  it('produces the same file from parts encoded separately', () => {
+    const frames = adtsFrames();
+    const split = Math.floor(frames.length / 2);
+
+    // Two "workers" each write one half into its own part file.
+    const parts = [frames.slice(0, split), frames.slice(split)].map((half) => {
+      const part = new MemoryFile();
+      const packets = new PacketWriter(part, 0);
+      for (const frame of half) packets.addPacket(frame.subarray(7), AUDIO_SPECIFIC_CONFIG);
+      packets.flush();
+      return { part, sizes: packets.packetSizes.slice() };
+    });
+
+    const file = new MemoryFile();
+    const writer = new M4bWriter(file, FORMAT);
+    for (const { part, sizes } of parts) writer.appendPart(part, sizes, AUDIO_SPECIFIC_CONFIG);
+    writer.finish({ chapters: CHAPTERS, metadata: METADATA });
+
+    expect(file.bytes).toEqual(writeFromRawPackets().bytes);
   });
 
   it.skipIf(!hasFfprobe()).each([

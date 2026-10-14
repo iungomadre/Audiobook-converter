@@ -26,20 +26,22 @@ server: decoding, AAC encoding and MP4 writing all run on your device.
 
 ## How it works
 
-1. [Mediabunny](https://mediabunny.dev) reads each file and decodes it with
-   the browser's WebCodecs `AudioDecoder`.
-2. All audio is mixed to the chosen channel count and resampled to 44.1 kHz
-   (`src/shared/lib/audio`), so files with different formats can be joined.
-3. Mediabunny encodes AAC with the browser's native encoder, or with
-   `@mediabunny/aac-encoder` (FFmpeg's encoder compiled to WebAssembly) where
-   none exists, e.g. Firefox and Chrome on Linux. That ~1 MB module is only
-   downloaded when needed.
-4. Our own streaming writer (`src/shared/lib/mp4`) puts every AAC packet
-   straight into a file in the Origin Private File System and keeps only a
-   4-byte size per packet in memory (~25 MB for 40 hours). At the end it
-   appends the QuickTime chapter track, the Nero `chpl` list, the iTunes tags
-   and the audiobook flag. (Mediabunny's own MP4 muxer keeps an object per
-   packet until the end, which made iOS kill the tab on long books.)
+1. Chapters are encoded **in parallel**: up to 4 at once on computers (one
+   fewer than the CPU cores), 2 on phones and tablets. Each chapter gets a
+   **fresh Web Worker** that is terminated when the chapter is done, so any
+   memory the browser's decoder or encoder holds on to is released after every
+   chapter instead of piling up over a long book (iOS kills tabs that use too
+   much memory).
+2. In each worker, [Mediabunny](https://mediabunny.dev) decodes the file with
+   WebCodecs; the audio is mixed to the chosen channel count and resampled to
+   44.1 kHz (`src/shared/lib/audio`), then encoded to AAC by the browser's
+   native encoder or by `@mediabunny/aac-encoder` (FFmpeg's encoder as
+   WebAssembly, ~1 MB, only downloaded where needed, e.g. Firefox).
+3. Each worker writes its chapter's AAC packets into a part file in the Origin
+   Private File System, keeping just a 4-byte size per packet in memory.
+4. A final worker copies the parts in order into the M4B (deleting each part
+   once copied) and appends the QuickTime chapter track, the Nero `chpl` list,
+   iTunes tags, cover and the audiobook flag (`src/shared/lib/mp4`).
 5. The file is saved via the File System Access save dialog, or a download.
 
 On phones the screen is kept awake during conversion (Screen Wake Lock), and
@@ -83,7 +85,7 @@ src/
   entities/
     book/                 book model, store, audio presets
   shared/
-    lib/mp4/              streaming M4B writer (chapters, tags, cover)
+    lib/mp4/              packet/part writers and M4B assembly (chapters, tags, cover)
     lib/audio/            channel remixing and streaming resampler
     lib/storage/          OPFS and file saving
     i18n/                 translations, plural rules, live language switching

@@ -1,31 +1,64 @@
-import { toErrorInfo } from '../model/errors';
 /// <reference lib="webworker" />
 import { fromSyncAccessHandle, type SyncAccessHandle } from '@/shared/lib/mp4';
 import { getOutputDirectory } from '@/shared/lib/storage';
-import { convertToM4b } from '../lib/convert-to-m4b';
+import { assembleBook, buildMetadata, encodeChapter } from '../lib/convert-to-m4b';
+import { toErrorInfo } from '../model/errors';
 import type { WorkerRequest, WorkerResponse } from '../model/protocol';
 
-const post = (message: WorkerResponse) => self.postMessage(message);
+type Handle = SyncAccessHandle & { flush(): void; close(): void };
+
+const post = (message: WorkerResponse, transfer: Transferable[] = []) => self.postMessage(message, transfer);
+
+/** Opens a file in the output directory for synchronous access (one worker at a time per file). */
+const open = async (name: string): Promise<Handle> => {
+  const fileHandle = await (await getOutputDirectory()).getFileHandle(name, { create: true });
+  return (fileHandle as unknown as { createSyncAccessHandle(): Promise<Handle> }).createSyncAccessHandle();
+};
 
 self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
-  if (data.type !== 'convert') return;
-  const { job } = data;
-  let handle: (SyncAccessHandle & { flush(): void; close(): void }) | undefined;
+  const handles: Handle[] = [];
+  const openTracked = async (name: string) => {
+    const handle = await open(name);
+    handles.push(handle);
+    return handle;
+  };
+  const closeAll = () => {
+    for (const handle of handles.splice(0)) {
+      handle.flush();
+      handle.close();
+    }
+  };
 
   try {
-    const directory = await getOutputDirectory();
-    const fileHandle = await directory.getFileHandle(job.outputName, { create: true });
-    handle = await (fileHandle as unknown as { createSyncAccessHandle(): Promise<NonNullable<typeof handle>> })
-      .createSyncAccessHandle();
-
-    const result = await convertToM4b(job, fromSyncAccessHandle(handle), (progress) => post({ type: 'progress', ...progress }));
-    handle.flush();
-    const size = handle.getSize();
-    handle.close();
-    handle = undefined;
-    post({ type: 'done', outputName: job.outputName, size, ...result });
+    if (data.type === 'encode-chapter') {
+      const part = await openTracked(data.partName);
+      const result = await encodeChapter(data.settings, data.file, fromSyncAccessHandle(part), (seconds) =>
+        post({ type: 'progress', processedSeconds: seconds }));
+      closeAll();
+      post({ type: 'chapter-done', ...result }, [result.sizes.buffer]);
+    } else {
+      const directory = await getOutputDirectory();
+      const output = fromSyncAccessHandle(await openTracked(data.settings.outputName));
+      const parts = data.parts.map(({ name, sizes }) => ({
+        sizes,
+        open: async () => {
+          const handle = await open(name);
+          return {
+            file: fromSyncAccessHandle(handle),
+            release: async () => {
+              handle.close();
+              await directory.removeEntry(name);
+            },
+          };
+        },
+      }));
+      const result = await assembleBook(
+        data.settings, output, parts, data.audioSpecificConfig, data.chapters, buildMetadata(data.metadata, data.cover));
+      closeAll();
+      post({ type: 'finished', ...result });
+    }
   } catch (error) {
-    handle?.close();
+    for (const handle of handles.splice(0)) handle.close();
     post({ type: 'error', error: toErrorInfo(error) });
   }
 };

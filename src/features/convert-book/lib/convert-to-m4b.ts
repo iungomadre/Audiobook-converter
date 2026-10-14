@@ -1,13 +1,16 @@
-import { LocalizedError } from '../model/errors';
 import {
   AdtsOutputFormat, ALL_FORMATS, AudioSample, AudioSampleSink, AudioSampleSource, BlobSource, canEncodeAudio, Input,
   NullTarget, Output,
 } from 'mediabunny';
+import type { BookMetadata } from '@/entities/book';
 import { remixChannels, StreamingResampler, type PlanarPcm } from '@/shared/lib/audio';
-import { M4bWriter, type ChapterMarker, type M4bMetadata, type RandomAccessFile } from '@/shared/lib/mp4';
-import type { ConversionJob, ConversionProgress } from '../model/protocol';
+import {
+  M4bWriter, PacketWriter, type AudioFormat, type ChapterMarker, type M4bMetadata, type RandomAccessFile,
+} from '@/shared/lib/mp4';
+import { LocalizedError } from '../model/errors';
+import type { ConversionJob, ConversionSettings } from '../model/protocol';
 
-const SAMPLE_RATE = 44_100;
+export const SAMPLE_RATE = 44_100;
 const PROGRESS_INTERVAL_MS = 250;
 
 let wasmEncoderRegistered = false;
@@ -23,109 +26,124 @@ const ensureAacEncoder = async (numberOfChannels: number, bitrate: number): Prom
   return 'wasm';
 };
 
-export const buildMetadata = (job: ConversionJob): M4bMetadata => {
-  const { title, author, narrator, year, genre, description } = job.metadata;
-  return {
-    title,
-    album: title,
-    artist: author,
-    albumArtist: author,
-    narrator,
-    year,
-    genre,
-    description,
-    cover: job.cover,
-  };
-};
+const audioFormat = (settings: ConversionSettings): AudioFormat => ({
+  sampleRate: SAMPLE_RATE,
+  numberOfChannels: settings.numberOfChannels,
+  bitrate: settings.bitrate,
+});
 
 /**
- * Decodes every input file in order, re-encodes the audio to AAC as one continuous track,
- * writes it as MP4 into `file` and finally adds chapters and audiobook metadata.
+ * Decodes one input file and writes it as raw AAC packets into `part`.
+ * Returns the packet sizes and decoder config needed to assemble the book.
  */
-export const convertToM4b = async (
-  job: ConversionJob,
-  file: RandomAccessFile,
-  onProgress: (progress: ConversionProgress) => void,
-): Promise<{ durationSeconds: number; encoder: 'native' | 'wasm' }> => {
-  const encoder = await ensureAacEncoder(job.numberOfChannels, job.bitrate);
-  const writer = new M4bWriter(file, { sampleRate: SAMPLE_RATE, numberOfChannels: job.numberOfChannels, bitrate: job.bitrate });
+export const encodeChapter = async (
+  settings: ConversionSettings,
+  inputFile: File,
+  part: RandomAccessFile,
+  onProgress: (chapterSeconds: number) => void,
+): Promise<{ sizes: Uint32Array; audioSpecificConfig: Uint8Array; encoder: 'native' | 'wasm' }> => {
+  const encoder = await ensureAacEncoder(settings.numberOfChannels, settings.bitrate);
+  part.truncate(0);
+  const writer = new PacketWriter(part, 0);
 
-  // Mediabunny only encodes here. Its MP4 muxer keeps an object per packet in
-  // memory until the end, which on a 40-hour book is enough for iOS to kill
-  // the tab, so packets go to our own writer and Mediabunny's (lightweight,
-  // non-retaining) ADTS muxer writes into a NullTarget.
+  // Mediabunny only decodes and encodes here: packets go to our own writer, and
+  // its lightweight ADTS muxer (which keeps nothing) writes into a NullTarget.
   const output = new Output({ format: new AdtsOutputFormat(), target: new NullTarget() });
-  // Mediabunny needs constant input parameters per track, so every file is
-  // normalized to the same channel count and sample rate before encoding.
   const source = new AudioSampleSource({
     codec: 'aac',
-    bitrate: job.bitrate,
+    bitrate: settings.bitrate,
     onEncodedPacket: (packet, meta) => {
       const description = meta?.decoderConfig?.description;
-      writer.addPacket(
-        packet.data,
-        Math.round(packet.duration * SAMPLE_RATE),
-        description ? toBytes(description) : undefined,
-      );
+      writer.addPacket(packet.data, description ? toBytes(description) : undefined);
     },
   });
   output.addAudioTrack(source);
   await output.start();
 
-  const knownTotal = job.chapters.every((chapter) => chapter.durationSeconds !== null)
-    ? job.chapters.reduce((sum, chapter) => sum + chapter.durationSeconds!, 0)
-    : null;
-  const markers: ChapterMarker[] = [];
+  const input = new Input({ formats: ALL_FORMATS, source: new BlobSource(inputFile) });
   let framesWritten = 0;
-  const position = () => framesWritten / SAMPLE_RATE;
   let lastReport = 0;
-
   try {
-    for (const [chapterIndex, chapter] of job.chapters.entries()) {
-      markers.push({ title: chapter.title, startSeconds: position() });
+    const track = await input.getPrimaryAudioTrack();
+    if (!track) throw new LocalizedError('error.noAudio', { file: inputFile.name }, `"${inputFile.name}" contains no audio.`);
+    if (!(await track.canDecode())) {
+      const codec = track.codec ?? '?';
+      throw new LocalizedError('error.cannotDecode', { file: inputFile.name, codec }, `Cannot decode "${inputFile.name}" (${codec}).`);
+    }
 
-      const input = new Input({ formats: ALL_FORMATS, source: new BlobSource(chapter.file) });
-      try {
-        const track = await input.getPrimaryAudioTrack();
-        if (!track) throw new LocalizedError('error.noAudio', { file: chapter.file.name }, `"${chapter.file.name}" contains no audio.`);
-        if (!(await track.canDecode())) {
-          const codec = track.codec ?? '?';
-          throw new LocalizedError('error.cannotDecode', { file: chapter.file.name, codec }, `Cannot decode "${chapter.file.name}" (${codec}).`);
-        }
+    // Mediabunny needs constant input parameters per track, so every file is
+    // normalized to the same channel count and sample rate before encoding.
+    const resampler = new StreamingResampler(track.sampleRate, SAMPLE_RATE, settings.numberOfChannels);
+    for await (const decoded of new AudioSampleSink(track).samples()) {
+      const pcm = resampler.process(remixChannels(toPlanar(decoded), settings.numberOfChannels));
+      decoded.close();
+      if (pcm[0].length === 0) continue;
 
-        const resampler = new StreamingResampler(track.sampleRate, SAMPLE_RATE, job.numberOfChannels);
-        for await (const decoded of new AudioSampleSink(track).samples()) {
-          const pcm = resampler.process(remixChannels(toPlanar(decoded), job.numberOfChannels));
-          decoded.close();
-          if (pcm[0].length === 0) continue;
+      const sample = fromPlanar(pcm, framesWritten / SAMPLE_RATE);
+      framesWritten += pcm[0].length;
+      await source.add(sample);
+      sample.close();
 
-          // Files are laid end to end, ignoring each file's own start offset.
-          const sample = fromPlanar(pcm, position());
-          framesWritten += pcm[0].length;
-          await source.add(sample);
-          sample.close();
-
-          const now = Date.now();
-          if (now - lastReport >= PROGRESS_INTERVAL_MS) {
-            lastReport = now;
-            onProgress({ chapterIndex, processedSeconds: position(), totalSeconds: knownTotal });
-          }
-        }
-      } finally {
-        input.dispose();
+      const now = Date.now();
+      if (now - lastReport >= PROGRESS_INTERVAL_MS) {
+        lastReport = now;
+        onProgress(framesWritten / SAMPLE_RATE);
       }
     }
 
     source.close();
-    await output.finalize();
+    await output.finalize(); // Flushes the encoder, so every packet of this chapter is written
   } catch (error) {
     await output.cancel().catch(() => {});
     throw error;
+  } finally {
+    input.dispose();
   }
 
-  onProgress({ chapterIndex: job.chapters.length - 1, processedSeconds: position(), totalSeconds: knownTotal });
-  writer.finish({ chapters: markers, metadata: buildMetadata(job) });
-  return { durationSeconds: writer.durationSeconds, encoder };
+  writer.flush();
+  if (!writer.audioSpecificConfig) throw new LocalizedError('error.noAudio', { file: inputFile.name }, `"${inputFile.name}" contains no audio.`);
+  return { sizes: writer.packetSizes.slice(), audioSpecificConfig: writer.audioSpecificConfig, encoder };
+};
+
+export const buildMetadata = (metadata: BookMetadata, cover: ConversionJob['cover']): M4bMetadata => ({
+  title: metadata.title,
+  album: metadata.title,
+  artist: metadata.author,
+  albumArtist: metadata.author,
+  narrator: metadata.narrator,
+  year: metadata.year,
+  genre: metadata.genre,
+  description: metadata.description,
+  cover,
+});
+
+export type PartSource = {
+  sizes: Uint32Array;
+  /** Opens the part file; `release` closes and deletes it once copied. */
+  open: () => Promise<{ file: RandomAccessFile; release: () => Promise<void> }>;
+};
+
+/**
+ * Copies the chapter parts into the M4B in order, deleting each one once it is
+ * copied (so the extra disk space stays around one part), then writes the
+ * chapters, tags and cover.
+ */
+export const assembleBook = async (
+  settings: ConversionSettings,
+  file: RandomAccessFile,
+  parts: PartSource[],
+  audioSpecificConfig: Uint8Array,
+  chapters: ChapterMarker[],
+  metadata: M4bMetadata,
+): Promise<{ size: number; durationSeconds: number }> => {
+  const writer = new M4bWriter(file, audioFormat(settings));
+  for (const part of parts) {
+    const { file: partFile, release } = await part.open();
+    writer.appendPart(partFile, part.sizes, audioSpecificConfig);
+    await release();
+  }
+  const size = writer.finish({ chapters, metadata });
+  return { size, durationSeconds: writer.durationSeconds };
 };
 
 const toBytes = (source: AllowSharedBufferSource): Uint8Array =>
